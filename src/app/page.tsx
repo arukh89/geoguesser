@@ -246,9 +246,9 @@ export default function GeoExplorerGame() {
     setShowMap(false);
   };
 
-  // Toggle map visibility
+  // Toggle map visibility (defer to next tick to avoid detaching the clicked button mid-action)
   const toggleMap = (): void => {
-    setShowMap((prev: boolean) => !prev);
+    setTimeout(() => setShowMap((prev: boolean) => !prev), 0);
   };
 
   // Share results on Farcaster
