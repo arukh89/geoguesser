@@ -2,7 +2,6 @@
 let L: any = undefined;
 
 if (typeof window !== 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   L = require('leaflet');
   require('leaflet/dist/leaflet.css');
 

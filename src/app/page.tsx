@@ -101,23 +101,57 @@ export default function GeoExplorerGame() {
 
   const [currentScreen, setCurrentScreen] = useState<GameScreen>('home');
   const [showMap, setShowMap] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  async function fetchRandomShot() {
+    const base = process.env.NEXT_PUBLIC_BASE_URL ?? '';
+    const r = await fetch(`${base}/api/location/random`, { cache: 'no-store' });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j?.found ? j as { provider: 'mapillary'|'kartaview'; imageId?: string; imageUrl?: string; lat: number; lon: number } : null;
+  }
 
   // Initialize game
   const startGame = (): void => {
-    const locations = getRandomLocations(TOTAL_ROUNDS);
-    setGameState({
-      currentRound: 1,
-      totalRounds: TOTAL_ROUNDS,
-      score: 0,
-      locations: locations,
-      currentLocation: locations[0] || null,
-      guess: null,
-      roundScores: [],
-      gameStarted: true,
-      gameEnded: false,
-    });
-    setCurrentScreen('playing');
-    setShowMap(false);
+    // Run async to fetch global shots; fallback to curated list on failure
+    (async () => {
+      try {
+        setLoading(true);
+        const shots = await Promise.all(Array.from({ length: TOTAL_ROUNDS }).map(() => fetchRandomShot()));
+        const fallback = getRandomLocations(TOTAL_ROUNDS);
+        const locations = shots.map((s, i) => {
+          if (!s) return fallback[i];
+          return {
+            id: s.imageId || `kv-${i}`,
+            name: 'Mystery Location',
+            country: '',
+            continent: '',
+            lat: s.lat,
+            lng: s.lon,
+            provider: s.provider,
+            imageId: s.imageId,
+            imageUrl: s.imageUrl,
+            difficulty: 'medium' as const,
+            hints: [],
+          };
+        });
+        setGameState({
+          currentRound: 1,
+          totalRounds: TOTAL_ROUNDS,
+          score: 0,
+          locations: locations,
+          currentLocation: locations[0] || null,
+          guess: null,
+          roundScores: [],
+          gameStarted: true,
+          gameEnded: false,
+        });
+        setCurrentScreen('playing');
+        setShowMap(false);
+      } finally {
+        setLoading(false);
+      }
+    })();
   };
 
   // Handle guess submission
@@ -234,7 +268,14 @@ export default function GeoExplorerGame() {
           <div className="h-[calc(100vh-73px)] flex flex-col md:flex-row">
             {/* Panorama Viewer */}
             <div className={`${showMap ? 'hidden md:flex' : 'flex'} flex-1 relative`}>
-              <PanoramaViewer imageUrl={gameState.currentLocation.panoramaUrl} />
+              <PanoramaViewer
+                imageUrl={gameState.currentLocation.panoramaUrl}
+                shot={gameState.currentLocation.provider ? {
+                  provider: gameState.currentLocation.provider as 'mapillary'|'kartaview',
+                  imageId: gameState.currentLocation.imageId,
+                  imageUrl: gameState.currentLocation.imageUrl,
+                } : undefined}
+              />
               
               <button
                 onClick={toggleMap}
