@@ -9,7 +9,7 @@ import FinalResults from '@/components/game/FinalResults';
 import { getRandomLocations } from '@/lib/game/locations';
 import { calculateDistance, calculateScore } from '@/lib/game/scoring';
 import { toast } from 'sonner';
-import type { GameState, Location, RoundResult } from '@/lib/game/types';
+import type { GameMode, GameState, Location, RoundResult } from '@/lib/game/types';
 import { sdk } from "@farcaster/miniapp-sdk";
 import { useAddMiniApp } from "@/hooks/useAddMiniApp";
 import { useQuickAuth } from "@/hooks/useQuickAuth";
@@ -26,6 +26,7 @@ const WorldMap = dynamic(() => import('@/components/game/WorldMap'), {
 });
 
 const TOTAL_ROUNDS = 5;
+const TIME_ATTACK_LIMIT = 60; // seconds per round
 
 type GameScreen = 'home' | 'playing' | 'results' | 'final';
 
@@ -101,38 +102,107 @@ export default function GeoExplorerGame() {
 
   const [currentScreen, setCurrentScreen] = useState<GameScreen>('home');
   const [showMap, setShowMap] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  async function fetchRandomShot() {
+    const base = process.env.NEXT_PUBLIC_BASE_URL ?? '';
+    const r = await fetch(`${base}/api/location/random`, { cache: 'no-store' });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j?.found ? j as { provider: 'mapillary'|'kartaview'; imageId?: string; imageUrl?: string; lat: number; lon: number } : null;
+  }
 
   // Initialize game
-  const startGame = (): void => {
-    const locations = getRandomLocations(TOTAL_ROUNDS);
-    setGameState({
-      currentRound: 1,
-      totalRounds: TOTAL_ROUNDS,
-      score: 0,
-      locations: locations,
-      currentLocation: locations[0] || null,
-      guess: null,
-      roundScores: [],
-      gameStarted: true,
-      gameEnded: false,
-    });
-    setCurrentScreen('playing');
-    setShowMap(false);
+  const startGame = (mode: GameMode, durationSec?: number): void => {
+    // Run async to fetch global shots; fallback to curated list on failure
+    (async () => {
+      try {
+        setLoading(true);
+        const shots = await Promise.all(Array.from({ length: TOTAL_ROUNDS }).map(() => fetchRandomShot()));
+        const fallback = getRandomLocations(TOTAL_ROUNDS);
+        const locations = shots.map((s, i) => {
+          if (!s) return fallback[i];
+          return {
+            id: s.imageId || `kv-${i}`,
+            name: 'Mystery Location',
+            country: '',
+            continent: '',
+            lat: s.lat,
+            lng: s.lon,
+            provider: s.provider,
+            imageId: s.imageId,
+            imageUrl: s.imageUrl,
+            difficulty: 'medium' as const,
+            hints: [],
+          };
+        });
+        setGameState({
+          currentRound: 1,
+          totalRounds: TOTAL_ROUNDS,
+          score: 0,
+          locations: locations,
+          currentLocation: locations[0] || null,
+          guess: null,
+          roundScores: [],
+          gameStarted: true,
+          gameEnded: false,
+          mode,
+          timeLimitSec: mode === 'time-attack' ? (durationSec ?? TIME_ATTACK_LIMIT) : undefined,
+          timeLeftSec: mode === 'time-attack' ? (durationSec ?? TIME_ATTACK_LIMIT) : undefined,
+        });
+        setCurrentScreen('playing');
+        setShowMap(false);
+      } finally {
+        setLoading(false);
+      }
+    })();
   };
+
+  // Countdown for Time Attack mode
+  useEffect(() => {
+    if (gameState.mode !== 'time-attack' || currentScreen !== 'playing') return;
+    if (!gameState.timeLeftSec || gameState.timeLeftSec <= 0) return;
+    const id = setInterval(() => {
+      setGameState((prev) => ({ ...prev, timeLeftSec: (prev.timeLeftSec ?? 0) - 1 }));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [gameState.mode, currentScreen, gameState.timeLeftSec]);
+
+  // Auto-finish round when time is up
+  useEffect(() => {
+    if (gameState.mode !== 'time-attack') return;
+    if (currentScreen !== 'playing') return;
+    if ((gameState.timeLeftSec ?? 0) > 0) return;
+    // No guess: count as 0 score
+    if (gameState.currentLocation) {
+      const roundResult: RoundResult = {
+        location: gameState.currentLocation,
+        guess: { lat: 0, lng: 0 },
+        distance: 20000,
+        score: 0,
+        round: gameState.currentRound,
+      };
+      setGameState((prev) => ({
+        ...prev,
+        roundScores: [...prev.roundScores, roundResult],
+      }));
+      setCurrentScreen('results');
+      setShowMap(false);
+    }
+  }, [gameState.timeLeftSec, currentScreen, gameState.mode, gameState.currentLocation, gameState.currentRound]);
 
   // Handle guess submission
   const handleGuess = (lat: number, lng: number): void => {
     if (!gameState.currentLocation) return;
 
+    // Compute locally; final submission to SpacetimeDB occurs in FinalResults
     const distance = calculateDistance(
       gameState.currentLocation.lat,
       gameState.currentLocation.lng,
       lat,
       lng
     );
-
     const result = calculateScore(distance);
-
     const roundResult: RoundResult = {
       location: gameState.currentLocation,
       guess: { lat, lng },
@@ -140,14 +210,12 @@ export default function GeoExplorerGame() {
       score: result.score,
       round: gameState.currentRound,
     };
-
     setGameState((prev: GameState) => ({
       ...prev,
       guess: { lat, lng },
       roundScores: [...prev.roundScores, roundResult],
       score: prev.score + result.score,
     }));
-
     setCurrentScreen('results');
     setShowMap(false);
   };
@@ -171,6 +239,7 @@ export default function GeoExplorerGame() {
       currentRound: nextRoundNumber,
       currentLocation: nextLocation || null,
       guess: null,
+      timeLeftSec: prev.mode === 'time-attack' ? (prev.timeLimitSec ?? TIME_ATTACK_LIMIT) : prev.timeLeftSec,
     }));
 
     setCurrentScreen('playing');
@@ -229,12 +298,21 @@ export default function GeoExplorerGame() {
             currentRound={gameState.currentRound}
             totalRounds={gameState.totalRounds}
             score={gameState.score}
+            timeLeftSec={gameState.mode === 'time-attack' ? gameState.timeLeftSec : undefined}
           />
 
           <div className="h-[calc(100vh-73px)] flex flex-col md:flex-row">
             {/* Panorama Viewer */}
             <div className={`${showMap ? 'hidden md:flex' : 'flex'} flex-1 relative`}>
-              <PanoramaViewer imageUrl={gameState.currentLocation.panoramaUrl} />
+              <PanoramaViewer
+                imageUrl={gameState.currentLocation.panoramaUrl}
+                shot={gameState.currentLocation.provider ? {
+                  provider: gameState.currentLocation.provider as 'mapillary'|'kartaview',
+                  imageId: gameState.currentLocation.imageId,
+                  imageUrl: gameState.currentLocation.imageUrl,
+                } : undefined}
+                allowMove={gameState.mode !== 'no-move'}
+              />
               
               <button
                 onClick={toggleMap}

@@ -1,21 +1,29 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { Info } from 'lucide-react';
+import { Attribution } from './Attribution';
+
+type Shot = { provider: 'mapillary'|'kartaview'; imageId?: string; imageUrl?: string };
 
 interface PanoramaViewerProps {
-  imageUrl: string;
+  imageUrl?: string; // legacy static images
+  shot?: Shot; // new provider-based imagery
   onLoad?: () => void;
+  allowMove?: boolean;
 }
 
-export default function PanoramaViewer({ imageUrl, onLoad }: PanoramaViewerProps) {
+const DynamicMapillary = dynamic(() => import('./MapillaryViewer'), { ssr: false });
+
+export default function PanoramaViewer({ imageUrl, shot, onLoad, allowMove = true }: PanoramaViewerProps) {
+  // Legacy simple draggable image viewer hooks must be unconditional
   const viewerRef = useRef<HTMLDivElement>(null);
+  const isLegacy = !shot && !!imageUrl;
 
   useEffect(() => {
-    // Simple panorama viewer with draggable image
-    // In production, you could use a library like Pannellum for true 360° viewing
-    
-    if (!viewerRef.current) return;
+    if (!isLegacy || !viewerRef.current) return;
 
     const viewer = viewerRef.current;
     let isDragging = false;
@@ -76,28 +84,64 @@ export default function PanoramaViewer({ imageUrl, onLoad }: PanoramaViewerProps
       viewer.removeEventListener('touchend', handleTouchEnd);
       viewer.removeEventListener('touchmove', handleTouchMove);
     };
-  }, []);
+  }, [isLegacy]);
 
   return (
     <div className="relative w-full h-full bg-black">
-      <div
-        ref={viewerRef}
-        className="w-full h-full overflow-hidden cursor-grab select-none"
-        style={{ touchAction: 'none' }}
-      >
-        <img
-          src={imageUrl}
-          alt="Panoramic view"
-          className="h-full w-auto min-w-full object-cover pointer-events-none"
-          onLoad={onLoad}
-          draggable={false}
-        />
-      </div>
+      {shot?.provider === 'mapillary' && shot.imageId ? (
+        <DynamicMapillary imageId={shot.imageId} allowMove={allowMove} />
+      ) : shot?.provider === 'kartaview' && (shot.imageUrl || imageUrl) ? (
+        <div className="relative w-full h-full">
+          <Image
+            src={(shot.imageUrl || imageUrl!) as string}
+            alt="Street"
+            fill
+            sizes="100vw"
+            style={{ objectFit: 'cover' }}
+            onLoad={onLoad}
+            priority
+          />
+          {!allowMove && (
+            <div className="absolute inset-0 bg-transparent" style={{ pointerEvents: 'auto' }} />
+          )}
+        </div>
+      ) : (
+        <div
+          ref={viewerRef}
+          className="w-full h-full overflow-hidden cursor-grab select-none"
+          style={{ touchAction: 'none' }}
+        >
+          {imageUrl && (
+            <div className="relative w-full h-full">
+              <Image
+                src={imageUrl}
+                alt="Panoramic view"
+                fill
+                sizes="100vw"
+                style={{ objectFit: 'cover' }}
+                onLoad={onLoad}
+                priority
+              />
+              {!allowMove && (
+                <div className="absolute inset-0 bg-transparent" style={{ pointerEvents: 'auto' }} />
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
-      <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white px-4 py-2 rounded-lg flex items-center gap-2">
-        <Info className="w-4 h-4" />
-        <span className="text-sm">Drag to look around</span>
-      </div>
+      {shot?.provider && (
+        <div className="absolute bottom-2 left-2">
+          <Attribution provider={shot.provider} />
+        </div>
+      )}
+
+      {isLegacy && (
+        <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white px-4 py-2 rounded-lg flex items-center gap-2">
+          <Info className="w-4 h-4" />
+          <span className="text-sm">Drag to look around</span>
+        </div>
+      )}
     </div>
   );
 }

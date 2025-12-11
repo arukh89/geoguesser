@@ -8,11 +8,10 @@ import type { LeaderboardEntry } from "@/lib/game/types";
 import { DbConnection, type SubscriptionHandle } from "@/spacetime";
 
 interface LeaderboardProps {
-  entries: LeaderboardEntry[];
   currentScore?: number;
 }
 
-export default function Leaderboard({ entries, currentScore }: LeaderboardProps) {
+export default function Leaderboard({ currentScore }: LeaderboardProps) {
   const [remoteEntries, setRemoteEntries] = useState<LeaderboardEntry[] | null>(null);
   const subRef = useRef<SubscriptionHandle | null>(null);
   const connRef = useRef<InstanceType<typeof DbConnection> | null>(null);
@@ -75,9 +74,9 @@ export default function Leaderboard({ entries, currentScore }: LeaderboardProps)
   }, []);
 
   const sortedEntries = useMemo(() => {
-    const list = remoteEntries && remoteEntries.length > 0 ? remoteEntries : entries;
+    const list = remoteEntries ?? [];
     return [...list].sort((a, b) => b.score - a.score).slice(0, 10);
-  }, [entries, remoteEntries]);
+  }, [remoteEntries]);
 
   const getMedalIcon = (rank: number) => {
     switch (rank) {
@@ -110,12 +109,12 @@ export default function Leaderboard({ entries, currentScore }: LeaderboardProps)
       <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
         <CardTitle className="text-2xl flex items-center gap-2">
           <TrendingUp className="w-6 h-6" />
-          {remoteEntries && remoteEntries.length > 0 ? "Live Leaderboard" : "Global Leaderboard"}
+          {remoteEntries && remoteEntries.length > 0 ? "Live Leaderboard" : "Leaderboard (connect STDB)"}
         </CardTitle>
         <CardDescription className="text-purple-100">
           {remoteEntries && remoteEntries.length > 0
             ? "Real-time scores from SpacetimeDB"
-            : "Top explorers from around the world"}
+            : "No data. Start SpacetimeDB to enable live leaderboard."}
         </CardDescription>
       </CardHeader>
 
@@ -171,7 +170,7 @@ export default function Leaderboard({ entries, currentScore }: LeaderboardProps)
         {!remoteEntries || remoteEntries.length === 0 ? (
           <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-sm text-blue-800">
-              <strong>Note:</strong> Showing local entries. Start SpacetimeDB on {`$`}{"{"}NEXT_PUBLIC_STDB_URI{"}"} or 127.0.0.1:3000 to enable live leaderboard.
+              <strong>Note:</strong> No entries yet. Start SpacetimeDB at {`$`}{"{"}NEXT_PUBLIC_STDB_URI{"}"} and play to populate the leaderboard.
             </p>
           </div>
         ) : null}

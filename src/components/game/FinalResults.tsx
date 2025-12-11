@@ -31,41 +31,7 @@ export default function FinalResults({
   const maxPossibleScore = results.length * 5000;
   const accuracyPercentage = (totalScore / maxPossibleScore) * 100;
 
-  // Generate local leaderboard entries
-  const localLeaderboard = [
-    {
-      id: 'current',
-      playerName: 'You',
-      score: totalScore,
-      rounds: results.length,
-      timestamp: Date.now(),
-      averageDistance: averageDistance,
-    },
-    {
-      id: '1',
-      playerName: 'GeoMaster',
-      score: 21500,
-      rounds: 5,
-      timestamp: Date.now() - 86400000,
-      averageDistance: 850,
-    },
-    {
-      id: '2',
-      playerName: 'WorldTraveler',
-      score: 19800,
-      rounds: 5,
-      timestamp: Date.now() - 172800000,
-      averageDistance: 1200,
-    },
-    {
-      id: '3',
-      playerName: 'MapExplorer',
-      score: 18200,
-      rounds: 5,
-      timestamp: Date.now() - 259200000,
-      averageDistance: 1450,
-    },
-  ];
+  // No local fallback: leaderboard is fully powered by SpacetimeDB
 
   const getPerformanceLevel = (percentage: number): { title: string; message: string; emoji: string } => {
     if (percentage >= 90) {
@@ -103,7 +69,7 @@ export default function FinalResults({
 
   const performance = getPerformanceLevel(accuracyPercentage);
 
-  // Submit score to SpacetimeDB once when final results are shown
+  // Submit score to SpacetimeDB once when final results are shown (best-effort)
   useEffect(() => {
     const submit = async () => {
       try {
@@ -130,6 +96,8 @@ export default function FinalResults({
     submit();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Removed internal API fallback; SpacetimeDB only
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 p-4 pt-16 md:pt-8">
@@ -306,7 +274,7 @@ export default function FinalResults({
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 1.1 }}
         >
-          <Leaderboard entries={localLeaderboard} currentScore={totalScore} />
+          <Leaderboard currentScore={totalScore} />
         </motion.div>
       </motion.div>
     </div>

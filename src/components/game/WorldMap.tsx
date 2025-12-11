@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import type { LatLngExpression } from 'leaflet';
 import '@/lib/leaflet.config';
@@ -28,11 +28,7 @@ function ClickHandler({ onClick }: { onClick: (pos: MapPosition) => void }) {
 
 export default function WorldMap({ onGuess, disabled = false }: WorldMapProps) {
   const [position, setPosition] = useState<MapPosition | null>(null);
-  const [isClient, setIsClient] = useState<boolean>(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const [isClient] = useState<boolean>(typeof window !== 'undefined');
 
   const handlePositionClick = (pos: MapPosition): void => {
     if (!disabled) {

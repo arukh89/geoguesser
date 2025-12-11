@@ -7,7 +7,10 @@ export interface Location {
   continent: string;
   lat: number;
   lng: number;
-  panoramaUrl: string;
+  panoramaUrl?: string; // legacy/static
+  provider?: 'mapillary' | 'kartaview' | 'static';
+  imageId?: string; // mapillary image id
+  imageUrl?: string; // kartaview/static image url
   difficulty: 'easy' | 'medium' | 'hard';
   hints?: string[];
 }
@@ -22,6 +25,9 @@ export interface GameState {
   roundScores: RoundResult[];
   gameStarted: boolean;
   gameEnded: boolean;
+  mode?: GameMode;
+  timeLeftSec?: number;
+  timeLimitSec?: number;
 }
 
 export interface RoundResult {
@@ -46,3 +52,5 @@ export interface GuessResult {
   score: number;
   maxScore: number;
 }
+
+export type GameMode = 'classic' | 'no-move' | 'time-attack';
