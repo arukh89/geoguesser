@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "playwright:install": "playwright install --with-deps"
   },
   "dependencies": {
     "@farcaster/miniapp-sdk": "^0.2.1",
@@ -78,6 +82,7 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.0",
     "@anton-seriesfi/ts-typie": "^3.0.2",
     "@types/date-fns": "^2.6.3",
     "@types/node": "20.17.47",
