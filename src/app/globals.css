@@ -1,0 +1,7 @@
+/* Minimal global CSS to satisfy Next.js import */
+html, body, #__next {
+  height: 100%;
+}
+* {
+  box-sizing: border-box;
+}
