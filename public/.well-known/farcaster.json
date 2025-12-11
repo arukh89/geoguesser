@@ -1,22 +1,22 @@
 {
   "miniapp": {
     "version": "1",
-    "name": "Geo Detective: Farcaster Quest",
-    "iconUrl": "https://usdozf7pplhxfvrl.public.blob.vercel-storage.com/thumbnail_8c9f581d-b3c2-44d5-9bf9-34945c983f14-s7tb5RVmkZXEQ6inrUbBNVnvC9WHaf",
-    "homeUrl": "https://adventure-cent-145.app.ohara.ai",
-    "imageUrl": "https://usdozf7pplhxfvrl.public.blob.vercel-storage.com/thumbnail_8c9f581d-b3c2-44d5-9bf9-34945c983f14-s7tb5RVmkZXEQ6inrUbBNVnvC9WHaf",
-    "buttonTitle": "Open with Ohara",
-    "splashImageUrl": "https://usdozf7pplhxfvrl.public.blob.vercel-storage.com/farcaster/splash_images/splash_image1.svg",
-    "splashBackgroundColor": "#ffffff",
+    "name": "GeoGuesser",
+    "iconUrl": "/icon.svg",
+    "homeUrl": "https://geoguesser-lemon.vercel.app/",
+    "imageUrl": "/frame-image.svg",
+    "buttonTitle": "Open with GeoGuesser",
+    "splashImageUrl": "/splash.svg",
+    "splashBackgroundColor": "#000000",
     "tags": [
-      "ohara",
+      "geo",
       "mini-app",
       "base",
       "farcaster"
     ],
     "primaryCategory": "entertainment",
-    "ogTitle": "Geo Detective: Farcaster Quest",
-    "ogImageUrl": "https://usdozf7pplhxfvrl.public.blob.vercel-storage.com/thumbnail_8c9f581d-b3c2-44d5-9bf9-34945c983f14-s7tb5RVmkZXEQ6inrUbBNVnvC9WHaf"
+    "ogTitle": "GeoGuesser",
+    "ogImageUrl": "/frame-image.svg"
   },
   "baseBuilder": {
     "ownerAddress": ""

@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test('home → start classic → make a guess → results screen', async ({ page }) => {
   await page.goto('/');
 
-  await expect(page.getByRole('heading', { name: 'Farcaster Geo Explorer' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'GeoGuesser' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Classic' }).click();
 

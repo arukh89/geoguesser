@@ -26,6 +26,8 @@ pub fn identity_disconnected(_ctx: &ReducerContext) {
 
 #[spacetimedb::reducer]
 pub fn submit_score(ctx: &ReducerContext, player_name: String, score_value: i32, rounds: i32, average_distance: i32) {
-    let row = Score { player_name, score_value, rounds, average_distance, ts_ms: 0 };
+    // Use the transaction time as a stable timestamp in milliseconds
+    let now_ms: u64 = ctx.transaction_time().as_millis() as u64;
+    let row = Score { player_name, score_value, rounds, average_distance, ts_ms: now_ms };
     ctx.db.score().insert(row);
 }

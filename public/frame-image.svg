@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/><feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g opacity="0.25" fill="#00ff41">
+    <rect x="0" y="80" width="1200" height="2"/>
+    <rect x="0" y="120" width="1200" height="1"/>
+    <rect x="0" y="160" width="1200" height="1"/>
+    <rect x="0" y="200" width="1200" height="1"/>
+    <rect x="0" y="240" width="1200" height="1"/>
+    <rect x="0" y="280" width="1200" height="1"/>
+    <rect x="0" y="320" width="1200" height="1"/>
+  </g>
+  <g filter="url(#glow)">
+    <text x="600" y="260" text-anchor="middle" font-family="VT323, 'Share Tech Mono', monospace" font-size="96" fill="#00ff41">GeoGuesser</text>
+    <text x="600" y="330" text-anchor="middle" font-family="'Share Tech Mono', monospace" font-size="28" fill="#9fffb1">Guess the location • 5 rounds • Leaderboard</text>
+  </g>
+  <g opacity="0.5">
+    <rect x="350" y="380" width="500" height="60" rx="8" ry="8" fill="none" stroke="#00ff41" stroke-width="3"/>
+    <text x="600" y="420" text-anchor="middle" font-family="VT323, 'Share Tech Mono', monospace" font-size="28" fill="#00ff41">Open with GeoGuesser</text>
+  </g>
+</svg>
