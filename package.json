@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "playwright:install": "playwright install --with-deps"
   },
   "dependencies": {
     "@farcaster/miniapp-sdk": "^0.2.1",
@@ -79,11 +83,12 @@
   },
   "devDependencies": {
     "@anton-seriesfi/ts-typie": "^3.0.2",
+    "@playwright/test": "^1.49.0",
     "@types/date-fns": "^2.6.3",
+    "@types/geojson": "^7946.0.16",
     "@types/node": "20.17.47",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
-    "@types/tailwindcss": "^3.1.0",
     "depcheck": "^1.4.7",
     "eslint": "^9.39.1",
     "eslint-config-next": "^16.0.8",

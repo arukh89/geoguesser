@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Trophy, Target, MapPin, ArrowRight } from "lucide-react";
 import type { RoundResult } from "@/lib/game/types";
 import { formatDistance, getPerformanceMessage } from "@/lib/game/scoring";
-import type { LatLngExpression } from "leaflet";
+import type { LatLngExpression, LatLngBoundsExpression } from "leaflet";
 import "@/lib/leaflet.config";
 
 // Dynamically import react-leaflet components to avoid SSR issues
@@ -63,7 +63,16 @@ export default function ResultsScreen({ result, onNext, isLastRound }: ResultsSc
   const actualPosition: LatLngExpression = [result.location.lat, result.location.lng];
   const guessPosition: LatLngExpression = [result.guess.lat, result.guess.lng];
   const linePositions: LatLngExpression[] = [actualPosition, guessPosition];
-  const bounds: LatLngExpression[] = [actualPosition, guessPosition];
+  const leafletBounds: LatLngBoundsExpression = [
+    [
+      Math.min(result.location.lat, result.guess.lat),
+      Math.min(result.location.lng, result.guess.lng),
+    ],
+    [
+      Math.max(result.location.lat, result.guess.lat),
+      Math.max(result.location.lng, result.guess.lng),
+    ],
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 pt-16 md:pt-8">
@@ -138,7 +147,7 @@ export default function ResultsScreen({ result, onNext, isLastRound }: ResultsSc
               className="h-96 rounded-lg overflow-hidden border-2"
             >
               {isClient && (
-                <MapContainer bounds={bounds} style={{ height: "100%", width: "100%" }} scrollWheelZoom={false}>
+                <MapContainer bounds={leafletBounds} style={{ height: "100%", width: "100%" }} scrollWheelZoom={false}>
                   <TileLayer
                     attribution="&copy; OpenStreetMap"
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

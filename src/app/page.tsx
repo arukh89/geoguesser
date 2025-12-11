@@ -246,10 +246,11 @@ export default function GeoExplorerGame() {
     setShowMap(false);
   };
 
-  // Toggle map visibility
-  const toggleMap = (): void => {
-    setShowMap((prev: boolean) => !prev);
+  // Show/hide map (defer show to next tick to avoid detaching the clicked button mid-action)
+  const showMapNow = (): void => {
+    setTimeout(() => setShowMap(true), 0);
   };
+  const hideMapNow = (): void => setShowMap(false);
 
   // Share results on Farcaster
   const handleShare = (): void => {
@@ -303,7 +304,7 @@ export default function GeoExplorerGame() {
 
           <div className="h-[calc(100vh-73px)] flex flex-col md:flex-row">
             {/* Panorama Viewer */}
-            <div className={`${showMap ? 'hidden md:flex' : 'flex'} flex-1 relative`}>
+            <div className={`${showMap ? 'hidden' : 'flex'} flex-1 relative`}>
               <PanoramaViewer
                 imageUrl={gameState.currentLocation.panoramaUrl}
                 shot={gameState.currentLocation.provider ? {
@@ -315,19 +316,17 @@ export default function GeoExplorerGame() {
               />
               
               <button
-                onClick={toggleMap}
+                onClick={showMapNow}
                 className="absolute bottom-4 right-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg font-semibold transition-colors z-10"
               >
                 {showMap ? 'Hide Map' : 'Make a Guess'}
               </button>
             </div>
 
-            {/* Map */}
-            {showMap && (
-              <div className="flex-1 h-full">
-                <WorldMap onGuess={handleGuess} />
-              </div>
-            )}
+            {/* Map as full-screen overlay when visible to avoid layout issues */}
+            <div className={`${showMap ? 'fixed inset-0 z-[100]' : 'hidden'} bg-white`} data-testid="map-overlay">
+              <WorldMap onGuess={handleGuess} active={showMap} />
+            </div>
           </div>
         </>
       )}
