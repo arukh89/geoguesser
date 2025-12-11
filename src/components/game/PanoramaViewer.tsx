@@ -12,11 +12,12 @@ interface PanoramaViewerProps {
   imageUrl?: string; // legacy static images
   shot?: Shot; // new provider-based imagery
   onLoad?: () => void;
+  allowMove?: boolean;
 }
 
 const DynamicMapillary = dynamic(() => import('./MapillaryViewer'), { ssr: false });
 
-export default function PanoramaViewer({ imageUrl, shot, onLoad }: PanoramaViewerProps) {
+export default function PanoramaViewer({ imageUrl, shot, onLoad, allowMove = true }: PanoramaViewerProps) {
   // Legacy simple draggable image viewer hooks must be unconditional
   const viewerRef = useRef<HTMLDivElement>(null);
   const isLegacy = !shot && !!imageUrl;
@@ -88,7 +89,7 @@ export default function PanoramaViewer({ imageUrl, shot, onLoad }: PanoramaViewe
   return (
     <div className="relative w-full h-full bg-black">
       {shot?.provider === 'mapillary' && shot.imageId ? (
-        <DynamicMapillary imageId={shot.imageId} />
+        <DynamicMapillary imageId={shot.imageId} allowMove={allowMove} />
       ) : shot?.provider === 'kartaview' && (shot.imageUrl || imageUrl) ? (
         <div className="relative w-full h-full">
           <Image
@@ -100,6 +101,9 @@ export default function PanoramaViewer({ imageUrl, shot, onLoad }: PanoramaViewe
             onLoad={onLoad}
             priority
           />
+          {!allowMove && (
+            <div className="absolute inset-0 bg-transparent" style={{ pointerEvents: 'auto' }} />
+          )}
         </div>
       ) : (
         <div
@@ -118,6 +122,9 @@ export default function PanoramaViewer({ imageUrl, shot, onLoad }: PanoramaViewe
                 onLoad={onLoad}
                 priority
               />
+              {!allowMove && (
+                <div className="absolute inset-0 bg-transparent" style={{ pointerEvents: 'auto' }} />
+              )}
             </div>
           )}
         </div>

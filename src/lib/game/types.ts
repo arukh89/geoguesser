@@ -25,6 +25,8 @@ export interface GameState {
   roundScores: RoundResult[];
   gameStarted: boolean;
   gameEnded: boolean;
+  mode?: GameMode;
+  timeLeftSec?: number;
 }
 
 export interface RoundResult {
@@ -49,3 +51,5 @@ export interface GuessResult {
   score: number;
   maxScore: number;
 }
+
+export type GameMode = 'classic' | 'no-move' | 'time-attack';

@@ -9,7 +9,7 @@ import FinalResults from '@/components/game/FinalResults';
 import { getRandomLocations } from '@/lib/game/locations';
 import { calculateDistance, calculateScore } from '@/lib/game/scoring';
 import { toast } from 'sonner';
-import type { GameState, Location, RoundResult } from '@/lib/game/types';
+import type { GameMode, GameState, Location, RoundResult } from '@/lib/game/types';
 import { sdk } from "@farcaster/miniapp-sdk";
 import { useAddMiniApp } from "@/hooks/useAddMiniApp";
 import { useQuickAuth } from "@/hooks/useQuickAuth";
@@ -26,6 +26,7 @@ const WorldMap = dynamic(() => import('@/components/game/WorldMap'), {
 });
 
 const TOTAL_ROUNDS = 5;
+const TIME_ATTACK_LIMIT = 60; // seconds per round
 
 type GameScreen = 'home' | 'playing' | 'results' | 'final';
 
@@ -112,7 +113,7 @@ export default function GeoExplorerGame() {
   }
 
   // Initialize game
-  const startGame = (): void => {
+  const startGame = (mode: GameMode): void => {
     // Run async to fetch global shots; fallback to curated list on failure
     (async () => {
       try {
@@ -145,6 +146,8 @@ export default function GeoExplorerGame() {
           roundScores: [],
           gameStarted: true,
           gameEnded: false,
+          mode,
+          timeLeftSec: mode === 'time-attack' ? TIME_ATTACK_LIMIT : undefined,
         });
         setCurrentScreen('playing');
         setShowMap(false);
@@ -154,36 +157,114 @@ export default function GeoExplorerGame() {
     })();
   };
 
+  // Countdown for Time Attack mode
+  useEffect(() => {
+    if (gameState.mode !== 'time-attack' || currentScreen !== 'playing') return;
+    if (!gameState.timeLeftSec || gameState.timeLeftSec <= 0) return;
+    const id = setInterval(() => {
+      setGameState((prev) => ({ ...prev, timeLeftSec: (prev.timeLeftSec ?? 0) - 1 }));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [gameState.mode, currentScreen, gameState.timeLeftSec]);
+
+  // Auto-finish round when time is up
+  useEffect(() => {
+    if (gameState.mode !== 'time-attack') return;
+    if (currentScreen !== 'playing') return;
+    if ((gameState.timeLeftSec ?? 0) > 0) return;
+    // No guess: count as 0 score
+    if (gameState.currentLocation) {
+      const roundResult: RoundResult = {
+        location: gameState.currentLocation,
+        guess: { lat: 0, lng: 0 },
+        distance: 20000,
+        score: 0,
+        round: gameState.currentRound,
+      };
+      setGameState((prev) => ({
+        ...prev,
+        roundScores: [...prev.roundScores, roundResult],
+      }));
+      setCurrentScreen('results');
+      setShowMap(false);
+    }
+  }, [gameState.timeLeftSec, currentScreen, gameState.mode, gameState.currentLocation, gameState.currentRound]);
+
   // Handle guess submission
   const handleGuess = (lat: number, lng: number): void => {
     if (!gameState.currentLocation) return;
 
-    const distance = calculateDistance(
-      gameState.currentLocation.lat,
-      gameState.currentLocation.lng,
-      lat,
-      lng
-    );
+    (async () => {
+      try {
+        const base = process.env.NEXT_PUBLIC_BASE_URL ?? '';
+        const res = await fetch(`${base}/api/score/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            playerName: 'You',
+            mode: gameState.mode ?? 'classic',
+            rounds: 1,
+            totalScoreClient: 0,
+            actual: { lat: gameState.currentLocation!.lat, lng: gameState.currentLocation!.lng },
+            guess: { lat, lng },
+            timeSpentSec: (gameState.mode === 'time-attack' && typeof gameState.timeLeftSec === 'number') ? (TIME_ATTACK_LIMIT - gameState.timeLeftSec) : undefined,
+            movementCount: 0,
+            pathMeters: 0,
+          }),
+        });
+        const j = await res.json();
+        const validatedScore = typeof j?.entry?.score === 'number' ? j.entry.score : calculateScore(calculateDistance(gameState.currentLocation.lat, gameState.currentLocation.lng, lat, lng)).score;
 
-    const result = calculateScore(distance);
+        const distance = calculateDistance(
+          gameState.currentLocation.lat,
+          gameState.currentLocation.lng,
+          lat,
+          lng
+        );
 
-    const roundResult: RoundResult = {
-      location: gameState.currentLocation,
-      guess: { lat, lng },
-      distance: distance,
-      score: result.score,
-      round: gameState.currentRound,
-    };
+        const roundResult: RoundResult = {
+          location: gameState.currentLocation,
+          guess: { lat, lng },
+          distance,
+          score: validatedScore,
+          round: gameState.currentRound,
+        };
 
-    setGameState((prev: GameState) => ({
-      ...prev,
-      guess: { lat, lng },
-      roundScores: [...prev.roundScores, roundResult],
-      score: prev.score + result.score,
-    }));
+        setGameState((prev: GameState) => ({
+          ...prev,
+          guess: { lat, lng },
+          roundScores: [...prev.roundScores, roundResult],
+          score: prev.score + validatedScore,
+        }));
 
-    setCurrentScreen('results');
-    setShowMap(false);
+        setCurrentScreen('results');
+        setShowMap(false);
+      } catch (e) {
+        // Fallback to local scoring
+        const distance = calculateDistance(
+          gameState.currentLocation.lat,
+          gameState.currentLocation.lng,
+          lat,
+          lng
+        );
+        const result = calculateScore(distance);
+        const roundResult: RoundResult = {
+          location: gameState.currentLocation,
+          guess: { lat, lng },
+          distance: distance,
+          score: result.score,
+          round: gameState.currentRound,
+        };
+        setGameState((prev: GameState) => ({
+          ...prev,
+          guess: { lat, lng },
+          roundScores: [...prev.roundScores, roundResult],
+          score: prev.score + result.score,
+        }));
+        setCurrentScreen('results');
+        setShowMap(false);
+      }
+    })();
   };
 
   // Move to next round
@@ -205,6 +286,7 @@ export default function GeoExplorerGame() {
       currentRound: nextRoundNumber,
       currentLocation: nextLocation || null,
       guess: null,
+      timeLeftSec: prev.mode === 'time-attack' ? TIME_ATTACK_LIMIT : prev.timeLeftSec,
     }));
 
     setCurrentScreen('playing');
@@ -263,6 +345,7 @@ export default function GeoExplorerGame() {
             currentRound={gameState.currentRound}
             totalRounds={gameState.totalRounds}
             score={gameState.score}
+            timeLeftSec={gameState.mode === 'time-attack' ? gameState.timeLeftSec : undefined}
           />
 
           <div className="h-[calc(100vh-73px)] flex flex-col md:flex-row">
@@ -275,6 +358,7 @@ export default function GeoExplorerGame() {
                   imageId: gameState.currentLocation.imageId,
                   imageUrl: gameState.currentLocation.imageUrl,
                 } : undefined}
+                allowMove={gameState.mode !== 'no-move'}
               />
               
               <button

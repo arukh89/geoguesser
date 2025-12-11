@@ -103,7 +103,7 @@ export default function FinalResults({
 
   const performance = getPerformanceLevel(accuracyPercentage);
 
-  // Submit score to SpacetimeDB once when final results are shown
+  // Submit score to SpacetimeDB once when final results are shown (best-effort)
   useEffect(() => {
     const submit = async () => {
       try {
@@ -128,6 +128,26 @@ export default function FinalResults({
       }
     };
     submit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Also submit to internal API leaderboard for environments without SpacetimeDB
+  useEffect(() => {
+    const post = async () => {
+      try {
+        const base = process.env.NEXT_PUBLIC_BASE_URL ?? '';
+        await fetch(`${base}/api/score/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            playerName: 'You',
+            rounds: results.length,
+            totalScoreClient: totalScore,
+          }),
+        });
+      } catch {}
+    };
+    post();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -6,10 +6,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Globe, MapPin, Trophy, Target } from 'lucide-react';
 
 interface HomeScreenProps {
-  onStart: () => void;
+  onStart: (mode: 'classic'|'no-move'|'time-attack') => void;
 }
 
 export default function HomeScreen({ onStart }: HomeScreenProps) {
+  const modes: { key: 'classic'|'no-move'|'time-attack'; title: string; desc: string }[] = [
+    { key: 'classic', title: 'Classic', desc: '5 rounds, free exploration' },
+    { key: 'no-move', title: 'No-Move', desc: 'Look around only, no navigation' },
+    { key: 'time-attack', title: 'Time Attack', desc: 'Beat the clock each round' },
+  ];
+  const start = (m: 'classic'|'no-move'|'time-attack') => onStart(m);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4 pt-16 md:pt-4">
       <motion.div
@@ -131,13 +137,21 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
                 transition={{ delay: 1.8 }}
                 className="pt-4"
               >
-                <Button
-                  onClick={onStart}
-                  size="lg"
-                  className="w-full text-lg h-14 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 shadow-lg"
-                >
-                  Start Exploring
-                </Button>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {modes.map((m) => (
+                    <Button
+                      key={m.key}
+                      onClick={() => start(m.key)}
+                      size="lg"
+                      className="w-full text-left h-14 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 shadow-lg"
+                    >
+                      <div className="flex flex-col items-start">
+                        <span className="font-semibold">{m.title}</span>
+                        <span className="text-xs opacity-80">{m.desc}</span>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
               </motion.div>
             </CardContent>
           </Card>
