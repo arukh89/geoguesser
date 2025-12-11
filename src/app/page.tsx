@@ -1,0 +1,275 @@
+'use client'
+import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+import HomeScreen from '@/components/game/HomeScreen';
+import GameHeader from '@/components/game/GameHeader';
+import PanoramaViewer from '@/components/game/PanoramaViewer';
+import ResultsScreen from '@/components/game/ResultsScreen';
+import FinalResults from '@/components/game/FinalResults';
+import { getRandomLocations } from '@/lib/game/locations';
+import { calculateDistance, calculateScore } from '@/lib/game/scoring';
+import { toast } from 'sonner';
+import type { GameState, Location, RoundResult } from '@/lib/game/types';
+import { sdk } from "@farcaster/miniapp-sdk";
+import { useAddMiniApp } from "@/hooks/useAddMiniApp";
+import { useQuickAuth } from "@/hooks/useQuickAuth";
+import { useIsInFarcaster } from "@/hooks/useIsInFarcaster";
+
+// Dynamic import for WorldMap to avoid SSR issues with Leaflet
+const WorldMap = dynamic(() => import('@/components/game/WorldMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+      <div className="text-gray-500">Loading map...</div>
+    </div>
+  ),
+});
+
+const TOTAL_ROUNDS = 5;
+
+type GameScreen = 'home' | 'playing' | 'results' | 'final';
+
+export default function GeoExplorerGame() {
+    const { addMiniApp } = useAddMiniApp();
+    const isInFarcaster = useIsInFarcaster()
+    useQuickAuth(isInFarcaster)
+    useEffect(() => {
+      const tryAddMiniApp = async () => {
+        try {
+          await addMiniApp()
+        } catch (error) {
+          console.error('Failed to add mini app:', error)
+        }
+
+      }
+
+    
+
+      tryAddMiniApp()
+    }, [addMiniApp])
+    useEffect(() => {
+      const initializeFarcaster = async () => {
+        try {
+          await new Promise(resolve => setTimeout(resolve, 100))
+          
+          if (document.readyState !== 'complete') {
+            await new Promise<void>(resolve => {
+              if (document.readyState === 'complete') {
+                resolve()
+              } else {
+                window.addEventListener('load', () => resolve(), { once: true })
+              }
+
+            })
+          }
+
+    
+
+          await sdk.actions.ready()
+          console.log('Farcaster SDK initialized successfully - app fully loaded')
+        } catch (error) {
+          console.error('Failed to initialize Farcaster SDK:', error)
+          
+          setTimeout(async () => {
+            try {
+              await sdk.actions.ready()
+              console.log('Farcaster SDK initialized on retry')
+            } catch (retryError) {
+              console.error('Farcaster SDK retry failed:', retryError)
+            }
+
+          }, 1000)
+        }
+
+      }
+
+    
+
+      initializeFarcaster()
+    }, [])
+  const [gameState, setGameState] = useState<GameState>({
+    currentRound: 0,
+    totalRounds: TOTAL_ROUNDS,
+    score: 0,
+    locations: [],
+    currentLocation: null,
+    guess: null,
+    roundScores: [],
+    gameStarted: false,
+    gameEnded: false,
+  });
+
+  const [currentScreen, setCurrentScreen] = useState<GameScreen>('home');
+  const [showMap, setShowMap] = useState<boolean>(false);
+
+  // Initialize game
+  const startGame = (): void => {
+    const locations = getRandomLocations(TOTAL_ROUNDS);
+    setGameState({
+      currentRound: 1,
+      totalRounds: TOTAL_ROUNDS,
+      score: 0,
+      locations: locations,
+      currentLocation: locations[0] || null,
+      guess: null,
+      roundScores: [],
+      gameStarted: true,
+      gameEnded: false,
+    });
+    setCurrentScreen('playing');
+    setShowMap(false);
+  };
+
+  // Handle guess submission
+  const handleGuess = (lat: number, lng: number): void => {
+    if (!gameState.currentLocation) return;
+
+    const distance = calculateDistance(
+      gameState.currentLocation.lat,
+      gameState.currentLocation.lng,
+      lat,
+      lng
+    );
+
+    const result = calculateScore(distance);
+
+    const roundResult: RoundResult = {
+      location: gameState.currentLocation,
+      guess: { lat, lng },
+      distance: distance,
+      score: result.score,
+      round: gameState.currentRound,
+    };
+
+    setGameState((prev: GameState) => ({
+      ...prev,
+      guess: { lat, lng },
+      roundScores: [...prev.roundScores, roundResult],
+      score: prev.score + result.score,
+    }));
+
+    setCurrentScreen('results');
+    setShowMap(false);
+  };
+
+  // Move to next round
+  const nextRound = (): void => {
+    if (gameState.currentRound >= gameState.totalRounds) {
+      setGameState((prev: GameState) => ({
+        ...prev,
+        gameEnded: true,
+      }));
+      setCurrentScreen('final');
+      return;
+    }
+
+    const nextRoundNumber = gameState.currentRound + 1;
+    const nextLocation = gameState.locations[nextRoundNumber - 1];
+
+    setGameState((prev: GameState) => ({
+      ...prev,
+      currentRound: nextRoundNumber,
+      currentLocation: nextLocation || null,
+      guess: null,
+    }));
+
+    setCurrentScreen('playing');
+    setShowMap(false);
+  };
+
+  // Toggle map visibility
+  const toggleMap = (): void => {
+    setShowMap((prev: boolean) => !prev);
+  };
+
+  // Share results on Farcaster
+  const handleShare = (): void => {
+    const shareText = `🌍 I scored ${gameState.score.toLocaleString()} points in Farcaster Geo Explorer!\n\nCan you beat my score? 🎯`;
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(shareText).then(() => {
+      toast.success('Score copied to clipboard! Share it on Farcaster!');
+    }).catch(() => {
+      toast.error('Failed to copy to clipboard');
+    });
+
+    // In a real implementation, this would integrate with Farcaster SDK
+    console.log('Share on Farcaster:', shareText);
+  };
+
+  // Restart game
+  const playAgain = (): void => {
+    setCurrentScreen('home');
+    setGameState({
+      currentRound: 0,
+      totalRounds: TOTAL_ROUNDS,
+      score: 0,
+      locations: [],
+      currentLocation: null,
+      guess: null,
+      roundScores: [],
+      gameStarted: false,
+      gameEnded: false,
+    });
+    setShowMap(false);
+  };
+
+  // Get current round result for results screen
+  const currentRoundResult = gameState.roundScores[gameState.roundScores.length - 1];
+
+  return (
+    <main className="min-h-screen bg-white">
+      {currentScreen === 'home' && (
+        <HomeScreen onStart={startGame} />
+      )}
+
+      {currentScreen === 'playing' && gameState.currentLocation && (
+        <>
+          <GameHeader
+            currentRound={gameState.currentRound}
+            totalRounds={gameState.totalRounds}
+            score={gameState.score}
+          />
+
+          <div className="h-[calc(100vh-73px)] flex flex-col md:flex-row">
+            {/* Panorama Viewer */}
+            <div className={`${showMap ? 'hidden md:flex' : 'flex'} flex-1 relative`}>
+              <PanoramaViewer imageUrl={gameState.currentLocation.panoramaUrl} />
+              
+              <button
+                onClick={toggleMap}
+                className="absolute bottom-4 right-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg font-semibold transition-colors z-10"
+              >
+                {showMap ? 'Hide Map' : 'Make a Guess'}
+              </button>
+            </div>
+
+            {/* Map */}
+            {showMap && (
+              <div className="flex-1 h-full">
+                <WorldMap onGuess={handleGuess} />
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {currentScreen === 'results' && currentRoundResult && (
+        <ResultsScreen
+          result={currentRoundResult}
+          onNext={nextRound}
+          isLastRound={gameState.currentRound >= gameState.totalRounds}
+        />
+      )}
+
+      {currentScreen === 'final' && (
+        <FinalResults
+          results={gameState.roundScores}
+          totalScore={gameState.score}
+          onPlayAgain={playAgain}
+          onShare={handleShare}
+        />
+      )}
+    </main>
+  );
+}
