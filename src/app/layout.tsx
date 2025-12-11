@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
 import { ResponseLogger } from "@/components/response-logger";
 import { cookies } from "next/headers";
@@ -7,16 +6,6 @@ import { ReadyNotifier } from "@/components/ready-notifier";
 import { Providers } from "./providers";
 import FarcasterWrapper from "@/components/FarcasterWrapper";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
 
 export default function RootLayout({
   children,
@@ -30,9 +19,7 @@ export default function RootLayout({
           <head>
             {requestId && <meta name="x-request-id" content={requestId} />}
           </head>
-          <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-          >
+          <body className={`antialiased`}>
             {/* Do not remove this component, we use it to notify the parent that the mini-app is ready */}
             <ReadyNotifier />
             <Providers>
