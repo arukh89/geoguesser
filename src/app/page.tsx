@@ -195,77 +195,29 @@ export default function GeoExplorerGame() {
   const handleGuess = (lat: number, lng: number): void => {
     if (!gameState.currentLocation) return;
 
-    (async () => {
-      try {
-        const base = process.env.NEXT_PUBLIC_BASE_URL ?? '';
-        const res = await fetch(`${base}/api/score/submit`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            playerName: 'You',
-            mode: gameState.mode ?? 'classic',
-            rounds: 1,
-            totalScoreClient: 0,
-            actual: { lat: gameState.currentLocation!.lat, lng: gameState.currentLocation!.lng },
-            guess: { lat, lng },
-            timeSpentSec: (gameState.mode === 'time-attack' && typeof gameState.timeLeftSec === 'number') ? ((gameState.timeLimitSec ?? TIME_ATTACK_LIMIT) - gameState.timeLeftSec) : undefined,
-            movementCount: 0,
-            pathMeters: 0,
-          }),
-        });
-        const j = await res.json();
-        const validatedScore = typeof j?.entry?.score === 'number' ? j.entry.score : calculateScore(calculateDistance(gameState.currentLocation.lat, gameState.currentLocation.lng, lat, lng)).score;
-
-        const distance = calculateDistance(
-          gameState.currentLocation.lat,
-          gameState.currentLocation.lng,
-          lat,
-          lng
-        );
-
-        const roundResult: RoundResult = {
-          location: gameState.currentLocation,
-          guess: { lat, lng },
-          distance,
-          score: validatedScore,
-          round: gameState.currentRound,
-        };
-
-        setGameState((prev: GameState) => ({
-          ...prev,
-          guess: { lat, lng },
-          roundScores: [...prev.roundScores, roundResult],
-          score: prev.score + validatedScore,
-        }));
-
-        setCurrentScreen('results');
-        setShowMap(false);
-      } catch (e) {
-        // Fallback to local scoring
-        const distance = calculateDistance(
-          gameState.currentLocation.lat,
-          gameState.currentLocation.lng,
-          lat,
-          lng
-        );
-        const result = calculateScore(distance);
-        const roundResult: RoundResult = {
-          location: gameState.currentLocation,
-          guess: { lat, lng },
-          distance: distance,
-          score: result.score,
-          round: gameState.currentRound,
-        };
-        setGameState((prev: GameState) => ({
-          ...prev,
-          guess: { lat, lng },
-          roundScores: [...prev.roundScores, roundResult],
-          score: prev.score + result.score,
-        }));
-        setCurrentScreen('results');
-        setShowMap(false);
-      }
-    })();
+    // Compute locally; final submission to SpacetimeDB occurs in FinalResults
+    const distance = calculateDistance(
+      gameState.currentLocation.lat,
+      gameState.currentLocation.lng,
+      lat,
+      lng
+    );
+    const result = calculateScore(distance);
+    const roundResult: RoundResult = {
+      location: gameState.currentLocation,
+      guess: { lat, lng },
+      distance: distance,
+      score: result.score,
+      round: gameState.currentRound,
+    };
+    setGameState((prev: GameState) => ({
+      ...prev,
+      guess: { lat, lng },
+      roundScores: [...prev.roundScores, roundResult],
+      score: prev.score + result.score,
+    }));
+    setCurrentScreen('results');
+    setShowMap(false);
   };
 
   // Move to next round
