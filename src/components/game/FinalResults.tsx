@@ -80,15 +80,14 @@ export default function FinalResults({
           .withLightMode(true)
           .build();
 
-        conn.reducers.submitScore({
+        await conn.reducers.submitScore({
           playerName: 'You',
           scoreValue: totalScore,
           rounds: results.length,
           averageDistance: Math.round(averageDistance),
         });
 
-        // Optional: disconnect shortly after submitting to avoid keeping a socket open
-        setTimeout(() => conn.disconnect(), 1500);
+        conn.disconnect();
       } catch (err) {
         console.error('Failed to submit score to SpacetimeDB:', err);
       }
