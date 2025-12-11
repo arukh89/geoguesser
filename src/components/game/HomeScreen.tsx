@@ -42,7 +42,7 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
             transition={{ delay: 0.4 }}
             className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent mb-3"
           >
-            Farcaster Geo Explorer
+            GeoGuesser
           </motion.h1>
 
           <motion.p

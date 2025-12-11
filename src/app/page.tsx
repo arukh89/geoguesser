@@ -106,10 +106,23 @@ export default function GeoExplorerGame() {
 
   async function fetchRandomShot() {
     const base = process.env.NEXT_PUBLIC_BASE_URL ?? '';
+    // Step 1: get random coordinates
     const r = await fetch(`${base}/api/location/random`, { cache: 'no-store' });
     if (!r.ok) return null;
-    const j = await r.json();
-    return j?.found ? j as { provider: 'mapillary'|'kartaview'; imageId?: string; imageUrl?: string; lat: number; lon: number } : null;
+    const coord: { found: boolean; lat?: number; lon?: number } = await r.json();
+    if (!coord?.found || coord.lat == null || coord.lon == null) return null;
+    // Step 2: resolve imagery near those coords (Mapillary)
+    try {
+      const ir = await fetch(`${base}/api/imagery/mapillary?lat=${coord.lat}&lon=${coord.lon}`, { cache: 'no-store' });
+      if (ir.ok) {
+        const img: { found?: boolean; provider?: 'mapillary'; imageId?: string; lat?: number; lon?: number } = await ir.json();
+        if (img?.found && img.provider === 'mapillary' && img.imageId) {
+          return { provider: 'mapillary' as const, imageId: img.imageId, lat: coord.lat, lon: coord.lon };
+        }
+      }
+    } catch {}
+    // If imagery not found, signal fallback to curated
+    return null;
   }
 
   // Initialize game
@@ -123,7 +136,7 @@ export default function GeoExplorerGame() {
         const locations = shots.map((s, i) => {
           if (!s) return fallback[i];
           return {
-            id: s.imageId || `kv-${i}`,
+            id: s.imageId || `mly-${i}`,
             name: 'Mystery Location',
             country: '',
             continent: '',
@@ -131,7 +144,6 @@ export default function GeoExplorerGame() {
             lng: s.lon,
             provider: s.provider,
             imageId: s.imageId,
-            imageUrl: s.imageUrl,
             difficulty: 'medium' as const,
             hints: [],
           };
