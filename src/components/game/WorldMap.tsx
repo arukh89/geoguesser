@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import type { LatLngExpression } from 'leaflet';
 import '@/lib/leaflet.config';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,17 @@ function ClickHandler({ onClick }: { onClick: (pos: MapPosition) => void }) {
       onClick({ lat: e.latlng.lat, lng: e.latlng.lng });
     },
   });
+  return null;
+}
+
+function AutoResize() {
+  const map = useMap();
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try { map.invalidateSize(); } catch {}
+    }, 50);
+    return () => clearTimeout(t);
+  }, [map]);
   return null;
 }
 
@@ -66,6 +77,7 @@ export default function WorldMap({ onGuess, disabled = false }: WorldMapProps) {
         scrollWheelZoom={true}
         zoomControl={true}
       >
+        <AutoResize />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
