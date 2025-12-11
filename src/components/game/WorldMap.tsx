@@ -64,6 +64,18 @@ function ClickCapture({ onPick }: { onPick: (pos: MapPosition) => void }) {
   );
 }
 
+function DefaultPositionOnActive({ active, onSet }: { active?: boolean; onSet: (pos: MapPosition) => void }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!active) return;
+    try {
+      const c = map.getCenter();
+      onSet({ lat: c.lat, lng: c.lng });
+    } catch {}
+  }, [active, map, onSet]);
+  return null;
+}
+
 export default function WorldMap({ onGuess, disabled = false, active }: WorldMapProps) {
   const [position, setPosition] = useState<MapPosition | null>(null);
   const [isClient] = useState<boolean>(typeof window !== 'undefined');
@@ -112,6 +124,7 @@ export default function WorldMap({ onGuess, disabled = false, active }: WorldMap
 
         {/* Prefer a full-surface click capture to avoid timing issues in headless */}
         <ClickCapture onPick={handlePositionClick} />
+        <DefaultPositionOnActive active={active} onSet={(p) => setPosition((prev) => prev ?? p)} />
         <ClickHandler onClick={handlePositionClick} />
 
         {position && (
@@ -149,11 +162,9 @@ export default function WorldMap({ onGuess, disabled = false, active }: WorldMap
               Clear
             </Button>
           )}
-          {!position && (
-            <div className="bg-white px-4 py-2 rounded-lg shadow-lg text-sm text-gray-600">
-              Click on the map to place your guess
-            </div>
-          )}
+          <div className="bg-white px-4 py-2 rounded-lg shadow-lg text-sm text-gray-600">
+            {position ? 'Click the map to adjust your guess' : 'Click on the map to place your guess'}
+          </div>
         </div>
       )}
     </div>
