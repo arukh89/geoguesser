@@ -113,7 +113,10 @@ export default function GeoExplorerGame() {
     if (!coord?.found || coord.lat == null || coord.lon == null) return null;
     // Step 2: resolve imagery near those coords (Mapillary)
     try {
-      const ir = await fetch(`${base}/api/imagery/mapillary?lat=${coord.lat}&lon=${coord.lon}`, { cache: 'no-store' });
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 1500);
+      const ir = await fetch(`${base}/api/imagery/mapillary?lat=${coord.lat}&lon=${coord.lon}`, { cache: 'no-store', signal: ctrl.signal });
+      clearTimeout(t);
       if (ir.ok) {
         const img: { found?: boolean; provider?: 'mapillary'; imageId?: string; lat?: number; lon?: number } = await ir.json();
         if (img?.found && img.provider === 'mapillary' && img.imageId) {
