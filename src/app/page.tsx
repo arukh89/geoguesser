@@ -323,8 +323,8 @@ export default function GeoExplorerGame() {
               </button>
             </div>
 
-            {/* Map */}
-            <div className={`${showMap ? 'block' : 'hidden'} flex-1 h-full relative z-[20]`}>
+            {/* Map as full-screen overlay when visible to avoid layout issues */}
+            <div className={`${showMap ? 'fixed inset-0 z-[100]' : 'hidden'} bg-white`}>
               <WorldMap onGuess={handleGuess} />
             </div>
           </div>
