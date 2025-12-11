@@ -1,16 +1,22 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapContainer, TileLayer, Marker, Polyline, Popup } from 'react-leaflet';
-import type { LatLngExpression } from 'leaflet';
-import { Trophy, MapPin, Target, ArrowRight } from 'lucide-react';
-import type { RoundResult } from '@/lib/game/types';
-import { formatDistance, getPerformanceMessage } from '@/lib/game/scoring';
-import '@/lib/leaflet.config';
-import { useEffect, useState } from 'react';
-import L from 'leaflet';
+import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Trophy, Target, MapPin, ArrowRight } from "lucide-react";
+import type { RoundResult } from "@/lib/game/types";
+import { formatDistance, getPerformanceMessage } from "@/lib/game/scoring";
+import type { LatLngExpression } from "leaflet";
+import "@/lib/leaflet.config";
+
+// Dynamically import react-leaflet components to avoid SSR issues
+const MapContainer = dynamic(() => import("react-leaflet").then((m) => m.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import("react-leaflet").then((m) => m.TileLayer), { ssr: false });
+const Marker = dynamic(() => import("react-leaflet").then((m) => m.Marker), { ssr: false });
+const Polyline = dynamic(() => import("react-leaflet").then((m) => m.Polyline), { ssr: false });
+const Popup = dynamic(() => import("react-leaflet").then((m) => m.Popup), { ssr: false });
 
 interface ResultsScreenProps {
   result: RoundResult;
@@ -18,30 +24,37 @@ interface ResultsScreenProps {
   isLastRound: boolean;
 }
 
-// Custom icons for markers
-const actualIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
-
-const guessIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
-
 export default function ResultsScreen({ result, onNext, isLastRound }: ResultsScreenProps) {
-  const [isClient, setIsClient] = useState<boolean>(false);
+  const [isClient, setIsClient] = useState(false);
+  const [icons, setIcons] = useState<{ actual: any; guess: any } | null>(null);
 
   useEffect(() => {
     setIsClient(true);
+    (async () => {
+      const leafletMod: any = await import("leaflet");
+      const L = leafletMod.default ?? leafletMod;
+      const actual = new L.Icon({
+        iconUrl:
+          "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
+        shadowUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+      });
+      const guess = new L.Icon({
+        iconUrl:
+          "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+        shadowUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+      });
+      setIcons({ actual, guess });
+    })();
   }, []);
 
   const scorePercentage = (result.score / 5000) * 100;
@@ -50,13 +63,7 @@ export default function ResultsScreen({ result, onNext, isLastRound }: ResultsSc
   const actualPosition: LatLngExpression = [result.location.lat, result.location.lng];
   const guessPosition: LatLngExpression = [result.guess.lat, result.guess.lng];
   const linePositions: LatLngExpression[] = [actualPosition, guessPosition];
-
-  // Calculate map bounds to show both markers
   const bounds: LatLngExpression[] = [actualPosition, guessPosition];
-  const center: LatLngExpression = [
-    (result.location.lat + result.guess.lat) / 2,
-    (result.location.lng + result.guess.lng) / 2
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 pt-16 md:pt-8">
@@ -68,18 +75,12 @@ export default function ResultsScreen({ result, onNext, isLastRound }: ResultsSc
       >
         <Card className="border-2 shadow-2xl overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-            <motion.div
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
+            <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
               <CardTitle className="text-3xl flex items-center gap-3">
                 <Trophy className="w-8 h-8" />
                 Round {result.round} Results
               </CardTitle>
-              <CardDescription className="text-blue-100 text-lg mt-2">
-                {performanceMessage}
-              </CardDescription>
+              <CardDescription className="text-blue-100 text-lg mt-2">{performanceMessage}</CardDescription>
             </motion.div>
           </CardHeader>
 
@@ -98,12 +99,8 @@ export default function ResultsScreen({ result, onNext, isLastRound }: ResultsSc
                     </div>
                     <div className="font-semibold text-gray-700">Location</div>
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {result.location.name}
-                  </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    {result.location.country}
-                  </div>
+                  <div className="text-2xl font-bold text-gray-900">{result.location.name}</div>
+                  <div className="text-sm text-gray-600 mt-1">{result.location.country}</div>
                 </CardContent>
               </Card>
 
@@ -115,12 +112,8 @@ export default function ResultsScreen({ result, onNext, isLastRound }: ResultsSc
                     </div>
                     <div className="font-semibold text-gray-700">Distance</div>
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {formatDistance(result.distance)}
-                  </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    from actual location
-                  </div>
+                  <div className="text-2xl font-bold text-gray-900">{formatDistance(result.distance)}</div>
+                  <div className="text-sm text-gray-600 mt-1">from actual location</div>
                 </CardContent>
               </Card>
 
@@ -132,12 +125,8 @@ export default function ResultsScreen({ result, onNext, isLastRound }: ResultsSc
                     </div>
                     <div className="font-semibold text-gray-700">Score</div>
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {result.score.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    {scorePercentage.toFixed(1)}% accuracy
-                  </div>
+                  <div className="text-2xl font-bold text-gray-900">{result.score.toLocaleString()}</div>
+                  <div className="text-sm text-gray-600 mt-1">{scorePercentage.toFixed(1)}% accuracy</div>
                 </CardContent>
               </Card>
             </motion.div>
@@ -149,53 +138,38 @@ export default function ResultsScreen({ result, onNext, isLastRound }: ResultsSc
               className="h-96 rounded-lg overflow-hidden border-2"
             >
               {isClient && (
-                <MapContainer
-                  bounds={bounds}
-                  style={{ height: '100%', width: '100%' }}
-                  scrollWheelZoom={false}
-                  zoomControl={true}
-                >
+                <MapContainer bounds={bounds} style={{ height: "100%", width: "100%" }} scrollWheelZoom={false}>
                   <TileLayer
-                    attribution='&copy; OpenStreetMap'
+                    attribution="&copy; OpenStreetMap"
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
 
-                  <Marker position={actualPosition} icon={actualIcon}>
+                  <Marker position={actualPosition} icon={icons?.actual as any}>
                     <Popup>
                       <div className="font-semibold">Actual Location</div>
                       <div className="text-sm">{result.location.name}</div>
                     </Popup>
                   </Marker>
 
-                  <Marker position={guessPosition} icon={guessIcon}>
+                  <Marker position={guessPosition} icon={icons?.guess as any}>
                     <Popup>
                       <div className="font-semibold">Your Guess</div>
                       <div className="text-sm">{formatDistance(result.distance)} away</div>
                     </Popup>
                   </Marker>
 
-                  <Polyline
-                    positions={linePositions}
-                    color="blue"
-                    weight={2}
-                    opacity={0.7}
-                    dashArray="10, 10"
-                  />
+                  <Polyline positions={linePositions} color="blue" weight={2} opacity={0.7} dashArray="10, 10" />
                 </MapContainer>
               )}
             </motion.div>
 
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.7 }}
-            >
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.7 }}>
               <Button
                 onClick={onNext}
                 size="lg"
                 className="w-full h-14 text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               >
-                {isLastRound ? 'View Final Results' : 'Next Round'}
+                {isLastRound ? "View Final Results" : "Next Round"}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </motion.div>
