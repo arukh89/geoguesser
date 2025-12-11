@@ -231,9 +231,6 @@ importers:
       '@types/react-dom':
         specifier: 19.1.6
         version: 19.1.6(@types/react@19.1.8)
-      '@types/tailwindcss':
-        specifier: ^3.1.0
-        version: 3.1.0
       depcheck:
         specifier: ^1.4.7
         version: 1.4.7
@@ -1604,10 +1601,6 @@ packages:
 
   '@types/request@2.48.13':
     resolution: {integrity: sha512-FGJ6udDNUCjd19pp0Q3iTiDkwhYup7J8hpMW9c4k53NrccQFFWKRho6hvtPPEhnXWKvukfwAlB6DbDz4yhH5Gg==}
-
-  '@types/tailwindcss@3.1.0':
-    resolution: {integrity: sha512-JxPzrm609hzvF4nmOI3StLjbBEP3WWQxDDJESqR1nh94h7gyyy3XSl0hn5RBMJ9mPudlLjtaXs5YEBtLw7CnPA==}
-    deprecated: This is a stub types definition. tailwindcss provides its own type definitions, so you do not need this installed.
 
   '@types/three@0.134.0':
     resolution: {integrity: sha512-4YB+99Rgqq27EjiYTItEoZtdjLnTh8W9LxowgpC9eWsjaQJIL4Kn/ZcUKAnW3gB/jS4hqGN8iqmid+RcUZDzpA==}
@@ -5532,10 +5525,6 @@ snapshots:
       '@types/node': 20.17.47
       '@types/tough-cookie': 4.0.5
       form-data: 2.5.5
-
-  '@types/tailwindcss@3.1.0':
-    dependencies:
-      tailwindcss: 4.1.17
 
   '@types/three@0.134.0': {}
 
