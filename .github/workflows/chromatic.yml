@@ -17,10 +17,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.12.0'
-          cache: 'pnpm'
 
-      - name: Enable corepack
-        run: corepack enable
+      - name: Enable corepack and prepare pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.18.3 --activate
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
