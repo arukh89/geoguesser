@@ -13,9 +13,7 @@ test('home → start classic → make a guess → results screen', async ({ page
   await expect(page.getByText('Click on the map to place your guess')).toBeVisible();
 
   const map = page.locator('.leaflet-container');
-  const box = await map.boundingBox();
-  if (!box) throw new Error('Map not visible');
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await map.click({ position: { x: 200, y: 200 } });
 
   await page.getByRole('button', { name: 'Confirm Guess' }).click();
 

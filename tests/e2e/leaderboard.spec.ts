@@ -4,10 +4,7 @@ async function completeOneRound(page: import('@playwright/test').Page) {
   await expect(page.getByRole('button', { name: 'Make a Guess' })).toBeVisible();
   await page.getByRole('button', { name: 'Make a Guess' }).click();
   const map = page.locator('.leaflet-container');
-  await expect(map).toBeVisible();
-  const box = await map.boundingBox();
-  if (!box) throw new Error('Map not visible');
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await map.click({ position: { x: 200, y: 200 } });
   await page.getByRole('button', { name: 'Confirm Guess' }).click();
 }
 
