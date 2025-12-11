@@ -82,9 +82,10 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
-    "@playwright/test": "^1.49.0",
     "@anton-seriesfi/ts-typie": "^3.0.2",
+    "@playwright/test": "^1.49.0",
     "@types/date-fns": "^2.6.3",
+    "@types/geojson": "^7946.0.16",
     "@types/node": "20.17.47",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
