@@ -113,7 +113,7 @@ export default function GeoExplorerGame() {
   }
 
   // Initialize game
-  const startGame = (mode: GameMode): void => {
+  const startGame = (mode: GameMode, durationSec?: number): void => {
     // Run async to fetch global shots; fallback to curated list on failure
     (async () => {
       try {
@@ -147,7 +147,8 @@ export default function GeoExplorerGame() {
           gameStarted: true,
           gameEnded: false,
           mode,
-          timeLeftSec: mode === 'time-attack' ? TIME_ATTACK_LIMIT : undefined,
+          timeLimitSec: mode === 'time-attack' ? (durationSec ?? TIME_ATTACK_LIMIT) : undefined,
+          timeLeftSec: mode === 'time-attack' ? (durationSec ?? TIME_ATTACK_LIMIT) : undefined,
         });
         setCurrentScreen('playing');
         setShowMap(false);
@@ -207,7 +208,7 @@ export default function GeoExplorerGame() {
             totalScoreClient: 0,
             actual: { lat: gameState.currentLocation!.lat, lng: gameState.currentLocation!.lng },
             guess: { lat, lng },
-            timeSpentSec: (gameState.mode === 'time-attack' && typeof gameState.timeLeftSec === 'number') ? (TIME_ATTACK_LIMIT - gameState.timeLeftSec) : undefined,
+            timeSpentSec: (gameState.mode === 'time-attack' && typeof gameState.timeLeftSec === 'number') ? ((gameState.timeLimitSec ?? TIME_ATTACK_LIMIT) - gameState.timeLeftSec) : undefined,
             movementCount: 0,
             pathMeters: 0,
           }),
@@ -286,7 +287,7 @@ export default function GeoExplorerGame() {
       currentRound: nextRoundNumber,
       currentLocation: nextLocation || null,
       guess: null,
-      timeLeftSec: prev.mode === 'time-attack' ? TIME_ATTACK_LIMIT : prev.timeLeftSec,
+      timeLeftSec: prev.mode === 'time-attack' ? (prev.timeLimitSec ?? TIME_ATTACK_LIMIT) : prev.timeLeftSec,
     }));
 
     setCurrentScreen('playing');

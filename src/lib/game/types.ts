@@ -27,6 +27,7 @@ export interface GameState {
   gameEnded: boolean;
   mode?: GameMode;
   timeLeftSec?: number;
+  timeLimitSec?: number;
 }
 
 export interface RoundResult {

@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Globe, MapPin, Trophy, Target } from 'lucide-react';
 
 interface HomeScreenProps {
-  onStart: (mode: 'classic'|'no-move'|'time-attack') => void;
+  onStart: (mode: 'classic'|'no-move'|'time-attack', durationSec?: number) => void;
 }
 
 export default function HomeScreen({ onStart }: HomeScreenProps) {
@@ -15,7 +15,7 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
     { key: 'no-move', title: 'No-Move', desc: 'Look around only, no navigation' },
     { key: 'time-attack', title: 'Time Attack', desc: 'Beat the clock each round' },
   ];
-  const start = (m: 'classic'|'no-move'|'time-attack') => onStart(m);
+  const start = (m: 'classic'|'no-move'|'time-attack', d?: number) => onStart(m, d);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4 pt-16 md:pt-4">
       <motion.div
@@ -151,6 +151,22 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
                       </div>
                     </Button>
                   ))}
+                </div>
+
+                <div className="mt-3">
+                  <div className="text-sm text-gray-600 mb-2">Time Attack duration</div>
+                  <div className="grid grid-cols-3 gap-3">
+                    {[30, 60, 90].map((sec) => (
+                      <Button
+                        key={sec}
+                        onClick={() => start('time-attack', sec)}
+                        size="lg"
+                        className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg"
+                      >
+                        Time Attack {sec}s
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </motion.div>
             </CardContent>
