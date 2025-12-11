@@ -1,9 +1,11 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trophy, Medal, Award, TrendingUp } from 'lucide-react';
-import type { LeaderboardEntry } from '@/lib/game/types';
+import { motion } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Trophy, Medal, Award, TrendingUp } from "lucide-react";
+import type { LeaderboardEntry } from "@/lib/game/types";
+import { DbConnection, type SubscriptionHandle } from "@/spacetime";
 
 interface LeaderboardProps {
   entries: LeaderboardEntry[];
@@ -11,7 +13,71 @@ interface LeaderboardProps {
 }
 
 export default function Leaderboard({ entries, currentScore }: LeaderboardProps) {
-  const sortedEntries = [...entries].sort((a: LeaderboardEntry, b: LeaderboardEntry) => b.score - a.score).slice(0, 10);
+  const [remoteEntries, setRemoteEntries] = useState<LeaderboardEntry[] | null>(null);
+  const subRef = useRef<SubscriptionHandle | null>(null);
+  const connRef = useRef<InstanceType<typeof DbConnection> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const connect = async () => {
+      try {
+        const uri = process.env.NEXT_PUBLIC_STDB_URI ?? "http://127.0.0.1:3000";
+        const conn = DbConnection.builder().withUri(uri).withModuleName("leaderboard").withLightMode(true).build();
+        connRef.current = conn;
+
+        const snapshot = () => {
+          const rows = Array.from(conn.db.score.iter());
+          const mapped: LeaderboardEntry[] = rows.map((r: any, idx: number) => ({
+            id: `${r.playerName}-${String(r.tsMs ?? 0)}-${idx}`,
+            playerName: r.playerName,
+            score: Number(r.scoreValue ?? 0),
+            rounds: Number(r.rounds ?? 0),
+            timestamp: Number(r.tsMs ?? 0),
+            averageDistance: Number(r.averageDistance ?? 0),
+          }));
+          if (!cancelled) setRemoteEntries(mapped);
+        };
+
+        // Keep state updated on table changes
+        const onAny = () => snapshot();
+        conn.db.score.onInsert(onAny);
+        conn.db.score.onDelete(onAny);
+        // Some tables may support onUpdate depending on PK; safe to try
+        // @ts-ignore optional
+        if ("onUpdate" in conn.db.score) (conn.db.score as any).onUpdate(() => snapshot());
+
+        // Subscribe to bring initial rows into the client cache
+        const sub = conn
+          .subscriptionBuilder()
+          .onApplied(() => snapshot())
+          .onError(() => {
+            if (!cancelled) setRemoteEntries(null);
+          })
+          .subscribe("SELECT * FROM score");
+        subRef.current = sub;
+      } catch (e) {
+        console.error("SpacetimeDB leaderboard subscribe failed:", e);
+        if (!cancelled) setRemoteEntries(null);
+      }
+    };
+    connect();
+    return () => {
+      cancelled = true;
+      try {
+        subRef.current?.unsubscribe();
+      } catch {}
+      try {
+        connRef.current?.disconnect();
+      } catch {}
+      subRef.current = null;
+      connRef.current = null;
+    };
+  }, []);
+
+  const sortedEntries = useMemo(() => {
+    const list = remoteEntries && remoteEntries.length > 0 ? remoteEntries : entries;
+    return [...list].sort((a, b) => b.score - a.score).slice(0, 10);
+  }, [entries, remoteEntries]);
 
   const getMedalIcon = (rank: number) => {
     switch (rank) {
@@ -44,10 +110,12 @@ export default function Leaderboard({ entries, currentScore }: LeaderboardProps)
       <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
         <CardTitle className="text-2xl flex items-center gap-2">
           <TrendingUp className="w-6 h-6" />
-          Global Leaderboard
+          {remoteEntries && remoteEntries.length > 0 ? "Live Leaderboard" : "Global Leaderboard"}
         </CardTitle>
         <CardDescription className="text-purple-100">
-          Top explorers from around the world
+          {remoteEntries && remoteEntries.length > 0
+            ? "Real-time scores from SpacetimeDB"
+            : "Top explorers from around the world"}
         </CardDescription>
       </CardHeader>
 
@@ -100,11 +168,13 @@ export default function Leaderboard({ entries, currentScore }: LeaderboardProps)
           </div>
         )}
 
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="text-sm text-blue-800">
-            <strong>Note:</strong> This is a local leaderboard. Upgrade to unlock persistent leaderboards and Farcaster integration!
-          </p>
-        </div>
+        {!remoteEntries || remoteEntries.length === 0 ? (
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-800">
+              <strong>Note:</strong> Showing local entries. Start SpacetimeDB on {`$`}{"{"}NEXT_PUBLIC_STDB_URI{"}"} or 127.0.0.1:3000 to enable live leaderboard.
+            </p>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );
