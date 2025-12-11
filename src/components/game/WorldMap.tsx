@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import type { LatLngExpression } from 'leaflet';
 import '@/lib/leaflet.config';
@@ -43,6 +43,25 @@ function AutoResize({ active }: { active?: boolean }) {
     return () => clearTimeout(t);
   }, [active, map]);
   return null;
+}
+
+function ClickCapture({ onPick }: { onPick: (pos: MapPosition) => void }) {
+  const map = useMap();
+  const ref = useRef<HTMLDivElement | null>(null);
+  const handle = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const point = map.containerPointToLatLng([e.clientX - rect.left, e.clientY - rect.top]);
+    onPick({ lat: point.lat, lng: point.lng });
+  };
+  return (
+    <div
+      ref={ref}
+      onClick={handle}
+      style={{ position: 'absolute', inset: 0, zIndex: 450, background: 'transparent' }}
+      aria-hidden="true"
+    />
+  );
 }
 
 export default function WorldMap({ onGuess, disabled = false, active }: WorldMapProps) {
@@ -91,6 +110,8 @@ export default function WorldMap({ onGuess, disabled = false, active }: WorldMap
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
+        {/* Prefer a full-surface click capture to avoid timing issues in headless */}
+        <ClickCapture onPick={handlePositionClick} />
         <ClickHandler onClick={handlePositionClick} />
 
         {position && (
