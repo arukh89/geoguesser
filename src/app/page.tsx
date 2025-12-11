@@ -246,10 +246,11 @@ export default function GeoExplorerGame() {
     setShowMap(false);
   };
 
-  // Toggle map visibility (defer to next tick to avoid detaching the clicked button mid-action)
-  const toggleMap = (): void => {
-    setTimeout(() => setShowMap((prev: boolean) => !prev), 0);
+  // Show/hide map (defer show to next tick to avoid detaching the clicked button mid-action)
+  const showMapNow = (): void => {
+    setTimeout(() => setShowMap(true), 0);
   };
+  const hideMapNow = (): void => setShowMap(false);
 
   // Share results on Farcaster
   const handleShare = (): void => {
@@ -315,7 +316,7 @@ export default function GeoExplorerGame() {
               />
               
               <button
-                onClick={toggleMap}
+                onClick={showMapNow}
                 className="absolute bottom-4 right-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg font-semibold transition-colors z-10"
               >
                 {showMap ? 'Hide Map' : 'Make a Guess'}
