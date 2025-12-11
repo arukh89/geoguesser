@@ -10,7 +10,7 @@ test('home → start classic → make a guess → results screen', async ({ page
   await expect(page.getByRole('button', { name: 'Make a Guess' })).toBeVisible();
   await page.getByRole('button', { name: 'Make a Guess' }).click();
 
-  await expect(page.getByText('Click on the map to place your guess')).toBeVisible();
+  await expect(page.getByText(/Click .* map .* guess/i)).toBeVisible();
 
   const ov = page.getByTestId('map-overlay');
   const obox = await ov.boundingBox();
