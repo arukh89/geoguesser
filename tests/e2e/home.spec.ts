@@ -12,8 +12,10 @@ test('home → start classic → make a guess → results screen', async ({ page
 
   await expect(page.getByText('Click on the map to place your guess')).toBeVisible();
 
-  const map = page.locator('.leaflet-container');
-  await map.click({ position: { x: 200, y: 200 } });
+  const ov = page.getByTestId('map-overlay');
+  const obox = await ov.boundingBox();
+  if (!obox) throw new Error('Map overlay not visible');
+  await page.mouse.click(obox.x + obox.width / 2, obox.y + obox.height / 2);
 
   await page.getByRole('button', { name: 'Confirm Guess' }).click();
 

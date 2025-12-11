@@ -324,7 +324,7 @@ export default function GeoExplorerGame() {
             </div>
 
             {/* Map as full-screen overlay when visible to avoid layout issues */}
-            <div className={`${showMap ? 'fixed inset-0 z-[100]' : 'hidden'} bg-white`}>
+            <div className={`${showMap ? 'fixed inset-0 z-[100]' : 'hidden'} bg-white`} data-testid="map-overlay">
               <WorldMap onGuess={handleGuess} active={showMap} />
             </div>
           </div>

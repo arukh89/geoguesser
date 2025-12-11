@@ -17,8 +17,10 @@ test('no-move mode basic flow', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Make a Guess' })).toBeVisible();
   await page.getByRole('button', { name: 'Make a Guess' }).click();
 
-  const map = page.locator('.leaflet-container');
-  await map.click({ position: { x: 200, y: 200 } });
+  const ov = page.getByTestId('map-overlay');
+  const obox = await ov.boundingBox();
+  if (!obox) throw new Error('Map overlay not visible');
+  await page.mouse.click(obox.x + obox.width / 2, obox.y + obox.height / 2);
 
   await page.getByRole('button', { name: 'Confirm Guess' }).click();
   await expect(page.getByText('Round 1 Results')).toBeVisible();

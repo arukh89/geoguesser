@@ -3,8 +3,10 @@ import { test, expect } from '@playwright/test';
 async function completeOneRound(page: import('@playwright/test').Page) {
   await expect(page.getByRole('button', { name: 'Make a Guess' })).toBeVisible();
   await page.getByRole('button', { name: 'Make a Guess' }).click();
-  const map = page.locator('.leaflet-container');
-  await map.click({ position: { x: 200, y: 200 } });
+  const ov = page.getByTestId('map-overlay');
+  const obox = await ov.boundingBox();
+  if (!obox) throw new Error('Map overlay not visible');
+  await page.mouse.click(obox.x + obox.width / 2, obox.y + obox.height / 2);
   await page.getByRole('button', { name: 'Confirm Guess' }).click();
 }
 
