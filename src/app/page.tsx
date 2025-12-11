@@ -303,7 +303,7 @@ export default function GeoExplorerGame() {
 
           <div className="h-[calc(100vh-73px)] flex flex-col md:flex-row">
             {/* Panorama Viewer */}
-            <div className={`${showMap ? 'hidden md:flex' : 'flex'} flex-1 relative`}>
+            <div className={`${showMap ? 'hidden' : 'flex'} flex-1 relative`}>
               <PanoramaViewer
                 imageUrl={gameState.currentLocation.panoramaUrl}
                 shot={gameState.currentLocation.provider ? {
