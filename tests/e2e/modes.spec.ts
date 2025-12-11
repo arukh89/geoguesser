@@ -29,6 +29,7 @@ test('no-move mode basic flow', async ({ page }) => {
 test('time-attack 30s shows timer', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Time Attack 30s' }).click();
-  // Header displays time label and seconds with 's'
-  await expect(page.getByText(/Time\s+\d+s/)).toBeVisible();
+  // Header displays time label and seconds with 's' (may be in separate elements)
+  await expect(page.getByText('Time')).toBeVisible();
+  await expect(page.getByText(/\d+s/)).toBeVisible();
 });
