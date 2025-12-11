@@ -7,6 +7,8 @@ import { Trophy, MapPin, Target, Share2, RotateCcw, TrendingUp } from 'lucide-re
 import type { RoundResult } from '@/lib/game/types';
 import { formatDistance, calculateAverageDistance } from '@/lib/game/scoring';
 import Leaderboard from './Leaderboard';
+import { useEffect } from 'react';
+import { DbConnection } from '@/spacetime';
 
 interface FinalResultsProps {
   results: RoundResult[];
@@ -100,6 +102,34 @@ export default function FinalResults({
   };
 
   const performance = getPerformanceLevel(accuracyPercentage);
+
+  // Submit score to SpacetimeDB once when final results are shown
+  useEffect(() => {
+    const submit = async () => {
+      try {
+        const uri = process.env.NEXT_PUBLIC_STDB_URI ?? 'http://127.0.0.1:3000';
+        const conn = DbConnection.builder()
+          .withUri(uri)
+          .withModuleName('leaderboard')
+          .withLightMode(true)
+          .build();
+
+        conn.reducers.submitScore({
+          playerName: 'You',
+          scoreValue: totalScore,
+          rounds: results.length,
+          averageDistance: Math.round(averageDistance),
+        });
+
+        // Optional: disconnect shortly after submitting to avoid keeping a socket open
+        setTimeout(() => conn.disconnect(), 1500);
+      } catch (err) {
+        console.error('Failed to submit score to SpacetimeDB:', err);
+      }
+    };
+    submit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 p-4 pt-16 md:pt-8">
