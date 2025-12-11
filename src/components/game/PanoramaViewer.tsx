@@ -97,7 +97,9 @@ export default function PanoramaViewer({ imageUrl, shot, onLoad, allowMove = tru
             alt="Street"
             fill
             sizes="100vw"
-            style={{ objectFit: 'cover' }}
+            style={{ objectFit: 'cover', pointerEvents: 'none', userSelect: 'none' }}
+            className="pointer-events-none select-none"
+            draggable={false}
             onLoad={onLoad}
             priority
           />
@@ -118,7 +120,9 @@ export default function PanoramaViewer({ imageUrl, shot, onLoad, allowMove = tru
                 alt="Panoramic view"
                 fill
                 sizes="100vw"
-                style={{ objectFit: 'cover' }}
+                style={{ objectFit: 'cover', pointerEvents: 'none', userSelect: 'none' }}
+                className="pointer-events-none select-none"
+                draggable={false}
                 onLoad={onLoad}
                 priority
               />

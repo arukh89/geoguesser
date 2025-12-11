@@ -144,10 +144,13 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
                       onClick={() => start(m.key)}
                       size="lg"
                       className="w-full text-left h-14 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 shadow-lg"
+                      aria-label={m.key === 'time-attack' ? 'Time Attack' : undefined}
                     >
                       <div className="flex flex-col items-start">
                         <span className="font-semibold">{m.title}</span>
-                        <span className="text-xs opacity-80">{m.desc}</span>
+                        <span className="text-xs opacity-80" aria-hidden={m.key === 'time-attack'}>
+                          {m.desc}
+                        </span>
                       </div>
                     </Button>
                   ))}
