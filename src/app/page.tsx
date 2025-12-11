@@ -134,7 +134,9 @@ export default function GeoExplorerGame() {
     (async () => {
       try {
         setLoading(true);
-        const shots = await Promise.all(Array.from({ length: TOTAL_ROUNDS }).map(() => fetchRandomShot()));
+        // Resolve imagery only for the first round to minimize startup latency
+        const first = await fetchRandomShot();
+        const shots = [first, null, null, null, null];
         const fallback = getRandomLocations(TOTAL_ROUNDS);
         const locations = shots.map((s, i) => {
           if (!s) return fallback[i];
