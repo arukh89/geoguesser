@@ -323,11 +323,9 @@ export default function GeoExplorerGame() {
             </div>
 
             {/* Map */}
-            {showMap && (
-              <div className="flex-1 h-full relative z-[20]">
-                <WorldMap onGuess={handleGuess} />
-              </div>
-            )}
+            <div className={`${showMap ? 'block' : 'hidden'} flex-1 h-full relative z-[20]`}>
+              <WorldMap onGuess={handleGuess} />
+            </div>
           </div>
         </>
       )}
