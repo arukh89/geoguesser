@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1200">
+  <rect width="800" height="1200" fill="#000"/>
+  <g opacity="0.15" fill="#00ff41">
+    <rect x="0" y="60" width="800" height="2"/>
+    <rect x="0" y="120" width="800" height="1"/>
+    <rect x="0" y="180" width="800" height="1"/>
+    <rect x="0" y="240" width="800" height="1"/>
+  </g>
+  <g>
+    <text x="400" y="600" text-anchor="middle" font-family="VT323, 'Share Tech Mono', monospace" font-size="72" fill="#00ff41">GeoGuesser</text>
+  </g>
+</svg>
