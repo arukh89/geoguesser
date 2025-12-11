@@ -4,7 +4,7 @@ test('home shows all mode buttons and durations', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('button', { name: 'Classic' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'No-Move' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Time Attack' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Time Attack', exact: true })).toBeVisible();
 
   await expect(page.getByRole('button', { name: 'Time Attack 30s' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Time Attack 60s' })).toBeVisible();
