@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'lat/lon required' }, { status: 400 });
     }
 
-    const token = process.env.MAPILLARY_SERVER_TOKEN;
+    const token = process.env.MAPILLARY_SERVER_TOKEN || process.env.NEXT_PUBLIC_MAPILLARY_TOKEN;
     if (!token) return NextResponse.json({ error: 'Missing Mapillary token' }, { status: 500 });
 
     const { x, y } = lonLatToTile(lon, lat, Z);

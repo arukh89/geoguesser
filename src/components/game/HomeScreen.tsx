@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Globe, MapPin, Trophy, Target } from 'lucide-react';
-import MatrixRain from '@/components/matrix/MatrixRain';
 
 interface HomeScreenProps {
   onStart: (mode: 'classic'|'no-move'|'time-attack', durationSec?: number) => void;
@@ -23,8 +22,7 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.04]" style={{
         backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0 1px, rgba(0,255,65,0.12) 1px 2px)'
       }} />
-      {/* digital rain */}
-      <MatrixRain className="opacity-[0.15]" />
+      {/* background rain now rendered globally in layout */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

@@ -326,13 +326,17 @@ export default function GeoExplorerGame() {
                 onClick={showMapNow}
                 size="lg"
                 className="absolute bottom-4 right-4 z-10"
+                aria-label="Make a Guess"
               >
-                {showMap ? 'Hide Map' : 'Make a Guess'}
+                Make a Guess
               </Button>
             </div>
 
             {/* Map as full-screen overlay when visible to avoid layout issues */}
             <div className={`${showMap ? 'fixed inset-0 z-[100]' : 'hidden'} bg-black`} data-testid="map-overlay">
+              <div className="absolute top-4 right-4 z-[1001]">
+                <Button onClick={hideMapNow} size="md" variant="secondary" aria-label="Close Map">Close</Button>
+              </div>
               <WorldMap onGuess={handleGuess} active={showMap} />
             </div>
           </div>

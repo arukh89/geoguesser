@@ -37,10 +37,9 @@ function AutoResize({ active }: { active?: boolean }) {
   }, [map]);
   useEffect(() => {
     if (!active) return;
-    const t = setTimeout(() => {
-      try { map.invalidateSize(); } catch {}
-    }, 50);
-    return () => clearTimeout(t);
+    const t1 = setTimeout(() => { try { map.invalidateSize(); } catch {} }, 50);
+    const t2 = setTimeout(() => { try { map.invalidateSize(); } catch {} }, 300);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [active, map]);
   return null;
 }
@@ -79,6 +78,7 @@ function DefaultPositionOnActive({ active, onSet }: { active?: boolean; onSet: (
 export default function WorldMap({ onGuess, disabled = false, active }: WorldMapProps) {
   const [position, setPosition] = useState<MapPosition | null>(null);
   const [isClient] = useState<boolean>(typeof window !== 'undefined');
+  const [useFallbackTiles, setUseFallbackTiles] = useState(false);
 
   const handlePositionClick = (pos: MapPosition): void => {
     if (!disabled) {
@@ -117,11 +117,19 @@ export default function WorldMap({ onGuess, disabled = false, active }: WorldMap
         zoomControl={true}
       >
         <AutoResize active={active} />
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          subdomains={['a','b','c','d'] as any}
-        />
+        {!useFallbackTiles ? (
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            subdomains={['a','b','c','d'] as any}
+            eventHandlers={{ tileerror: () => { console.warn('Tile failed, switching to fallback'); setUseFallbackTiles(true); } }}
+          />
+        ) : (
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
+        )}
 
         {/* Prefer a full-surface click capture to avoid timing issues in headless */}
         <ClickCapture onPick={handlePositionClick} />
