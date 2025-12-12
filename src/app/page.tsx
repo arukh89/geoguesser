@@ -8,6 +8,7 @@ import PanoramaViewer from '@/components/game/PanoramaViewer';
 import ResultsScreen from '@/components/game/ResultsScreen';
 import FinalResults from '@/components/game/FinalResults';
 import MissionNav from '@/components/game/MissionNav';
+import StartupSplash from '@/components/matrix/StartupSplash';
 import { getRandomLocations } from '@/lib/game/locations';
 import { calculateDistance, calculateScore } from '@/lib/game/scoring';
 import { toast } from 'sonner';
@@ -107,6 +108,7 @@ export default function GeoExplorerGame() {
   const [showMap, setShowMap] = useState<boolean>(false);
   const [showViewer, setShowViewer] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showSplash, setShowSplash] = useState<boolean>(true);
 
   async function fetchRandomShot() {
     const base = process.env.NEXT_PUBLIC_BASE_URL ?? '';
@@ -298,7 +300,9 @@ export default function GeoExplorerGame() {
           <MatrixLoader label="Initializing..." />
         </div>
       )}
-      {currentScreen === 'home' && (
+      {showSplash && <StartupSplash onDone={() => setShowSplash(false)} />}
+
+      {!showSplash && currentScreen === 'home' && (
         <HomeScreen onStart={startGame} />
       )}
 
@@ -320,31 +324,32 @@ export default function GeoExplorerGame() {
               />
             </div>
             {/* Open map overlay when guessing */}
-            <div className={`${showMap ? 'fixed inset-0 z-[100]' : 'hidden'}`}>
-              <div className="absolute top-4 right-4 z-[101]">
-                <Button onClick={hideMapNow} size="md" variant="secondary" aria-label="Close Map">Close</Button>
-              </div>
-              <div className="absolute inset-0">
+            <div className={`${showMap ? 'fixed inset-0 z-[100] flex items-center justify-center' : 'hidden'}`}>
+              {/* Centered map card to keep Matrix rain visible around edges */}
+              <div className="relative w-[min(1200px,95vw)] h-[min(770px,85vh)] rounded-2xl overflow-hidden mx-panel" data-testid="map-overlay">
+                <div className="absolute top-3 right-3 z-[5]">
+                  <Button onClick={hideMapNow} size="md" variant="secondary" aria-label="Close Map">Close</Button>
+                </div>
                 <WorldMap onGuess={handleGuess} active={showMap} />
-              </div>
 
-              {/* Mission image preview; click to open full-screen viewer */}
-              <button
-                type="button"
-                onClick={() => setShowViewer(true)}
-                className="absolute left-1/2 top-8 -translate-x-1/2 z-[102] w-[360px] h-[220px] rounded-xl overflow-hidden mx-panel"
-                aria-label="Open mission image"
-              >
-                <PanoramaViewer
-                  imageUrl={gameState.currentLocation.panoramaUrl}
-                  shot={gameState.currentLocation.provider ? {
-                    provider: gameState.currentLocation.provider as 'mapillary'|'kartaview',
-                    imageId: gameState.currentLocation.imageId,
-                    imageUrl: gameState.currentLocation.imageUrl,
-                  } : undefined}
-                  allowMove={false}
-                />
-              </button>
+                {/* Mission image preview; click to open full-screen viewer */}
+                <button
+                  type="button"
+                  onClick={() => setShowViewer(true)}
+                  className="absolute left-1/2 top-8 -translate-x-1/2 z-[6] w-[360px] h-[220px] rounded-xl overflow-hidden mx-panel"
+                  aria-label="Open mission image"
+                >
+                  <PanoramaViewer
+                    imageUrl={gameState.currentLocation.panoramaUrl}
+                    shot={gameState.currentLocation.provider ? {
+                      provider: gameState.currentLocation.provider as 'mapillary'|'kartaview',
+                      imageId: gameState.currentLocation.imageId,
+                      imageUrl: gameState.currentLocation.imageUrl,
+                    } : undefined}
+                    allowMove={false}
+                  />
+                </button>
+              </div>
             </div>
 
             {/* Full-screen image viewer overlay */}
