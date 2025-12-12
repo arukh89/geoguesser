@@ -29,8 +29,7 @@ export default async function RootLayout({
           </head>
           <body className={`antialiased ${mono.className}`}>
             <Providers>
-              {/* Full‑viewport Matrix rain background */}
-              <MatrixRain className="z-0 opacity-[0.15]" />
+              <MatrixRain className="pointer-events-none fixed inset-0 z-0 opacity-[0.15]" />
               <div className="relative z-10">
                 <GlobalHeader />
                 {/* Do not remove this component, we use it to notify the parent that the mini-app is ready */}
