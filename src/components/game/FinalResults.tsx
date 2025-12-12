@@ -100,44 +100,44 @@ export default function FinalResults({
   // Removed internal API fallback; SpacetimeDB only
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 p-4 pt-16 md:pt-8">
+    <div className="min-h-screen bg-[var(--bg)] p-4 pt-16 md:pt-8">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
         className="max-w-6xl mx-auto space-y-6"
       >
-        <Card className="border-2 shadow-2xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white text-center">
+        <Card className="shadow-2xl overflow-hidden mx-panel">
+          <CardHeader className="text-center border-b mx-border">
             <motion.div
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
               <div className="text-6xl mb-2">{performance.emoji}</div>
-              <CardTitle className="text-4xl mb-2">
+              <CardTitle className="text-4xl mb-2 text-[var(--accent)]">
                 {performance.title}!
               </CardTitle>
-              <CardDescription className="text-purple-100 text-xl">
+              <CardDescription className="text-[color:rgba(151,255,151,0.9)] text-xl">
                 {performance.message}
               </CardDescription>
             </motion.div>
           </CardHeader>
 
-          <CardContent className="p-6 space-y-6">
+          <CardContent className="p-6 space-y-6 text-[var(--text)]">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="text-center py-6 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border-2 border-yellow-200"
+              className="text-center py-6 rounded-lg mx-panel"
             >
-              <div className="text-sm font-semibold text-gray-600 mb-2">
+              <div className="text-sm font-semibold text-[color:rgba(151,255,151,0.8)] mb-2">
                 TOTAL SCORE
               </div>
-              <div className="text-6xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              <div className="text-6xl font-bold text-[var(--accent)]" style={{ filter: 'drop-shadow(0 0 12px rgba(0,255,65,.6))' }}>
                 {totalScore.toLocaleString()}
               </div>
-              <div className="text-sm text-gray-600 mt-2">
+              <div className="text-sm text-[color:rgba(151,255,151,0.8)] mt-2">
                 {accuracyPercentage.toFixed(1)}% accuracy
               </div>
             </motion.div>
@@ -148,49 +148,49 @@ export default function FinalResults({
               transition={{ delay: 0.5 }}
               className="grid grid-cols-1 md:grid-cols-3 gap-4"
             >
-              <Card>
+              <Card className="mx-panel">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="bg-blue-100 p-2 rounded-lg">
-                      <MapPin className="w-5 h-5 text-blue-600" />
+                    <div className="p-2 rounded-lg bg-[rgba(0,255,65,0.08)] border mx-border">
+                      <MapPin className="w-5 h-5 text-[var(--accent)]" />
                     </div>
-                    <div className="font-semibold text-gray-700">Avg Distance</div>
+                    <div className="font-semibold">Avg Distance</div>
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-2xl font-bold text-[var(--accent)]">
                     {formatDistance(averageDistance)}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="mx-panel">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="bg-green-100 p-2 rounded-lg">
-                      <Trophy className="w-5 h-5 text-green-600" />
+                    <div className="p-2 rounded-lg bg-[rgba(0,255,65,0.08)] border mx-border">
+                      <Trophy className="w-5 h-5 text-[var(--accent)]" />
                     </div>
-                    <div className="font-semibold text-gray-700">Best Round</div>
+                    <div className="font-semibold">Best Round</div>
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-2xl font-bold text-[var(--accent)]">
                     {bestRound.score.toLocaleString()}
                   </div>
-                  <div className="text-sm text-gray-600 mt-1">
+                  <div className="text-sm text-[color:rgba(151,255,151,0.8)] mt-1">
                     {bestRound.location.name}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="mx-panel">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="bg-purple-100 p-2 rounded-lg">
-                      <Target className="w-5 h-5 text-purple-600" />
+                    <div className="p-2 rounded-lg bg-[rgba(0,255,65,0.08)] border mx-border">
+                      <Target className="w-5 h-5 text-[var(--accent)]" />
                     </div>
-                    <div className="font-semibold text-gray-700">Rounds</div>
+                    <div className="font-semibold">Rounds</div>
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-2xl font-bold text-[var(--accent)]">
                     {results.length}
                   </div>
-                  <div className="text-sm text-gray-600 mt-1">
+                  <div className="text-sm text-[color:rgba(151,255,151,0.8)] mt-1">
                     completed
                   </div>
                 </CardContent>
@@ -202,9 +202,9 @@ export default function FinalResults({
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.7 }}
             >
-              <Card>
+              <Card className="mx-panel">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-[var(--accent)]">
                     <TrendingUp className="w-5 h-5" />
                     Round Breakdown
                   </CardTitle>
@@ -214,26 +214,26 @@ export default function FinalResults({
                     {results.map((result: RoundResult, index: number) => (
                       <div
                         key={result.round}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                        className="flex items-center justify-between p-3 mx-panel"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          <div className="w-8 h-8 text-[var(--bg)] bg-[var(--accent)] rounded-full flex items-center justify-center text-sm font-bold">
                             {index + 1}
                           </div>
                           <div>
-                            <div className="font-semibold text-gray-900">
+                            <div className="font-semibold">
                               {result.location.name}
                             </div>
-                            <div className="text-sm text-gray-600">
+                            <div className="text-sm text-[color:rgba(151,255,151,0.8)]">
                               {formatDistance(result.distance)} away
                             </div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold text-gray-900">
+                          <div className="font-bold text-[var(--accent)]">
                             {result.score.toLocaleString()}
                           </div>
-                          <div className="text-xs text-gray-500">points</div>
+                          <div className="text-xs text-[color:rgba(151,255,151,0.7)]">points</div>
                         </div>
                       </div>
                     ))}
@@ -251,7 +251,7 @@ export default function FinalResults({
               <Button
                 onClick={onShare}
                 size="lg"
-                className="flex-1 h-14 text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                className="flex-1 h-14 text-lg"
               >
                 <Share2 className="w-5 h-5 mr-2" />
                 Share on Farcaster
@@ -260,7 +260,7 @@ export default function FinalResults({
                 onClick={onPlayAgain}
                 size="lg"
                 variant="outline"
-                className="flex-1 h-14 text-lg border-2"
+                className="flex-1 h-14 text-lg"
               >
                 <RotateCcw className="w-5 h-5 mr-2" />
                 Play Again

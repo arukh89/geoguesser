@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Globe, MapPin, Trophy, Target } from 'lucide-react';
+import MatrixRain from '@/components/matrix/MatrixRain';
 
 interface HomeScreenProps {
   onStart: (mode: 'classic'|'no-move'|'time-attack', durationSec?: number) => void;
@@ -17,7 +18,13 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
   ];
   const start = (m: 'classic'|'no-move'|'time-attack', d?: number) => onStart(m, d);
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4 pt-16 md:pt-4">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex items-center justify-center p-4 pt-16 md:pt-4 relative overflow-hidden">
+      {/* subtle scanline overlay */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.04]" style={{
+        backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0 1px, rgba(0,255,65,0.12) 1px 2px)'
+      }} />
+      {/* digital rain */}
+      <MatrixRain className="opacity-[0.15]" />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -31,8 +38,8 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
             transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
             className="inline-block mb-4"
           >
-            <div className="bg-gradient-to-br from-blue-500 to-green-500 p-6 rounded-full">
-              <Globe className="w-16 h-16 text-white" />
+            <div className="p-6 rounded-full bg-[rgba(0,255,65,0.08)] border border-[rgba(0,255,65,0.3)] shadow-[var(--shadow)]">
+              <Globe className="w-16 h-16 text-[var(--accent)]" />
             </div>
           </motion.div>
 
@@ -40,7 +47,8 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent mb-3"
+            className="text-5xl md:text-6xl font-bold text-[var(--accent)] tracking-wide mb-3 mx-glitch"
+            data-text="Farcaster Geo Explorer"
           >
             Farcaster Geo Explorer
           </motion.h1>
@@ -49,7 +57,7 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="text-xl text-gray-600"
+            className="text-xl text-[color:rgba(151,255,151,0.8)]"
           >
             Explore the world. Test your geography skills. Share your scores.
           </motion.p>
@@ -60,7 +68,7 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
         >
-          <Card className="border-2 shadow-xl">
+          <Card className="shadow-xl">
             <CardHeader>
               <CardTitle className="text-2xl">How to Play</CardTitle>
               <CardDescription>Master the world in 3 simple steps</CardDescription>
@@ -72,12 +80,12 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
                 transition={{ delay: 1 }}
                 className="flex items-start gap-4"
               >
-                <div className="bg-blue-100 p-3 rounded-lg">
-                  <Globe className="w-6 h-6 text-blue-600" />
+                <div className="p-3 rounded-lg bg-[rgba(0,255,65,0.08)] border border-[rgba(0,255,65,0.25)]">
+                  <Globe className="w-6 h-6 text-[var(--accent)]" />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-lg mb-1">1. Explore</h3>
-                  <p className="text-gray-600">
+                  <p className="text-[color:rgba(151,255,151,0.8)]">
                     You&apos;ll be dropped into a random location around the world. Look around using your mouse or touch to drag the 360° view.
                   </p>
                 </div>
@@ -89,12 +97,12 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
                 transition={{ delay: 1.2 }}
                 className="flex items-start gap-4"
               >
-                <div className="bg-green-100 p-3 rounded-lg">
-                  <MapPin className="w-6 h-6 text-green-600" />
+                <div className="p-3 rounded-lg bg-[rgba(0,255,65,0.08)] border border-[rgba(0,255,65,0.25)]">
+                  <MapPin className="w-6 h-6 text-[var(--accent)]" />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-lg mb-1">2. Guess</h3>
-                  <p className="text-gray-600">
+                  <p className="text-[color:rgba(151,255,151,0.8)]">
                     Click on the world map to drop a pin where you think you are. The closer your guess, the higher your score!
                   </p>
                 </div>
@@ -106,8 +114,8 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
                 transition={{ delay: 1.4 }}
                 className="flex items-start gap-4"
               >
-                <div className="bg-purple-100 p-3 rounded-lg">
-                  <Trophy className="w-6 h-6 text-purple-600" />
+                <div className="p-3 rounded-lg bg-[rgba(0,255,65,0.08)] border border-[rgba(0,255,65,0.25)]">
+                  <Trophy className="w-6 h-6 text-[var(--accent)]" />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-lg mb-1">3. Score & Share</h3>
@@ -121,11 +129,11 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.6 }}
-                className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg border border-blue-200"
+                className="p-4 rounded-lg border mx-border bg-[rgba(0,255,65,0.06)]"
               >
                 <div className="flex items-center gap-3">
-                  <Target className="w-5 h-5 text-blue-600" />
-                  <p className="text-sm font-medium text-gray-700">
+                  <Target className="w-5 h-5 text-[var(--accent)]" />
+                  <p className="text-sm font-medium text-[var(--text)]">
                     <span className="font-bold">Pro Tip:</span> Look for landmarks, architecture, language signs, and vegetation to help identify your location!
                   </p>
                 </div>
@@ -143,12 +151,12 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
                       key={m.key}
                       onClick={() => start(m.key)}
                       size="lg"
-                      className="w-full text-left h-14 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 shadow-lg"
+                      className="w-full text-left h-14 hover:bg-[rgba(0,255,65,0.08)]"
                       aria-label={m.key === 'time-attack' ? 'Time Attack' : undefined}
                     >
                       <div className="flex flex-col items-start">
                         <span className="font-semibold">{m.title}</span>
-                        <span className="text-xs opacity-80" aria-hidden={m.key === 'time-attack'}>
+                        <span className="text-xs opacity-80 text-[color:rgba(151,255,151,0.8)]" aria-hidden={m.key === 'time-attack'}>
                           {m.desc}
                         </span>
                       </div>
@@ -157,14 +165,14 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
                 </div>
 
                 <div className="mt-3">
-                  <div className="text-sm text-gray-600 mb-2">Time Attack duration</div>
+                  <div className="text-sm text-[color:rgba(151,255,151,0.8)] mb-2">Time Attack duration</div>
                   <div className="grid grid-cols-3 gap-3">
                     {[30, 60, 90].map((sec) => (
                       <Button
                         key={sec}
                         onClick={() => start('time-attack', sec)}
                         size="lg"
-                        className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg"
+                        className="w-full h-12 hover:bg-[rgba(0,255,65,0.08)]"
                       >
                         Time Attack {sec}s
                       </Button>
@@ -180,7 +188,7 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 2 }}
-          className="text-center mt-6 text-sm text-gray-500"
+          className="text-center mt-6 text-sm text-[color:rgba(151,255,151,0.7)]"
         >
           Powered by Farcaster • Built on Base
         </motion.p>

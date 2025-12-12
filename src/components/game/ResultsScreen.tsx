@@ -33,26 +33,8 @@ export default function ResultsScreen({ result, onNext, isLastRound }: ResultsSc
     (async () => {
       const leafletMod: any = await import("leaflet");
       const L = leafletMod.default ?? leafletMod;
-      const actual = new L.Icon({
-        iconUrl:
-          "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
-        shadowUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
-      });
-      const guess = new L.Icon({
-        iconUrl:
-          "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
-        shadowUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
-      });
+      const actual = L.divIcon({ className: "mx-marker", html: "", iconSize: [18, 18], iconAnchor: [9, 9] });
+      const guess = L.divIcon({ className: "mx-marker guess", html: "", iconSize: [18, 18], iconAnchor: [9, 9] });
       setIcons({ actual, guess });
     })();
   }, []);
@@ -75,67 +57,67 @@ export default function ResultsScreen({ result, onNext, isLastRound }: ResultsSc
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 pt-16 md:pt-8">
+    <div className="min-h-screen bg-[var(--bg)] p-4 pt-16 md:pt-8">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
         className="max-w-6xl mx-auto"
       >
-        <Card className="border-2 shadow-2xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <Card className="shadow-2xl overflow-hidden mx-panel">
+          <CardHeader className="text-[var(--text)] border-b mx-border">
             <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
-              <CardTitle className="text-3xl flex items-center gap-3">
+              <CardTitle className="text-3xl flex items-center gap-3 text-[var(--accent)]">
                 <Trophy className="w-8 h-8" />
                 Round {result.round} Results
               </CardTitle>
-              <CardDescription className="text-blue-100 text-lg mt-2">{performanceMessage}</CardDescription>
+              <CardDescription className="text-[color:rgba(151,255,151,0.85)] text-lg mt-2">{performanceMessage}</CardDescription>
             </motion.div>
           </CardHeader>
 
-          <CardContent className="p-6 space-y-6">
+          <CardContent className="p-6 space-y-6 text-[var(--text)]">
             <motion.div
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
               className="grid grid-cols-1 md:grid-cols-3 gap-4"
             >
-              <Card className="border-2">
+              <Card className="mx-panel">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="bg-green-100 p-2 rounded-lg">
-                      <Target className="w-5 h-5 text-green-600" />
+                    <div className="p-2 rounded-lg bg-[rgba(0,255,65,0.08)] border mx-border">
+                      <Target className="w-5 h-5 text-[var(--accent)]" />
                     </div>
-                    <div className="font-semibold text-gray-700">Location</div>
+                    <div className="font-semibold">Location</div>
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">{result.location.name}</div>
-                  <div className="text-sm text-gray-600 mt-1">{result.location.country}</div>
+                  <div className="text-2xl font-bold text-[var(--accent)]">{result.location.name}</div>
+                  <div className="text-sm text-[color:rgba(151,255,151,0.8)] mt-1">{result.location.country}</div>
                 </CardContent>
               </Card>
 
-              <Card className="border-2">
+              <Card className="mx-panel">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="bg-blue-100 p-2 rounded-lg">
-                      <MapPin className="w-5 h-5 text-blue-600" />
+                    <div className="p-2 rounded-lg bg-[rgba(0,255,65,0.08)] border mx-border">
+                      <MapPin className="w-5 h-5 text-[var(--accent)]" />
                     </div>
-                    <div className="font-semibold text-gray-700">Distance</div>
+                    <div className="font-semibold">Distance</div>
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">{formatDistance(result.distance)}</div>
-                  <div className="text-sm text-gray-600 mt-1">from actual location</div>
+                  <div className="text-2xl font-bold text-[var(--accent)]">{formatDistance(result.distance)}</div>
+                  <div className="text-sm text-[color:rgba(151,255,151,0.8)] mt-1">from actual location</div>
                 </CardContent>
               </Card>
 
-              <Card className="border-2 bg-gradient-to-br from-yellow-50 to-orange-50">
+              <Card className="mx-panel">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="bg-yellow-100 p-2 rounded-lg">
-                      <Trophy className="w-5 h-5 text-yellow-600" />
+                    <div className="p-2 rounded-lg bg-[rgba(0,255,65,0.08)] border mx-border">
+                      <Trophy className="w-5 h-5 text-[var(--accent)]" />
                     </div>
-                    <div className="font-semibold text-gray-700">Score</div>
+                    <div className="font-semibold">Score</div>
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">{result.score.toLocaleString()}</div>
-                  <div className="text-sm text-gray-600 mt-1">{scorePercentage.toFixed(1)}% accuracy</div>
+                  <div className="text-2xl font-bold text-[var(--accent)]">{result.score.toLocaleString()}</div>
+                  <div className="text-sm text-[color:rgba(151,255,151,0.8)] mt-1">{scorePercentage.toFixed(1)}% accuracy</div>
                 </CardContent>
               </Card>
             </motion.div>
@@ -144,30 +126,31 @@ export default function ResultsScreen({ result, onNext, isLastRound }: ResultsSc
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="h-96 rounded-lg overflow-hidden border-2"
+              className="h-96 rounded-lg overflow-hidden mx-panel"
             >
               {isClient && (
                 <MapContainer bounds={leafletBounds} style={{ height: "100%", width: "100%" }} scrollWheelZoom={false}>
                   <TileLayer
-                    attribution="&copy; OpenStreetMap"
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    subdomains={["a","b","c","d"] as any}
                   />
 
                   <Marker position={actualPosition} icon={icons?.actual as any}>
                     <Popup>
-                      <div className="font-semibold">Actual Location</div>
-                      <div className="text-sm">{result.location.name}</div>
+                      <div className="font-semibold text-[var(--accent)]">Actual Location</div>
+                      <div className="text-sm text-[color:rgba(151,255,151,0.9)]">{result.location.name}</div>
                     </Popup>
                   </Marker>
 
                   <Marker position={guessPosition} icon={icons?.guess as any}>
                     <Popup>
-                      <div className="font-semibold">Your Guess</div>
-                      <div className="text-sm">{formatDistance(result.distance)} away</div>
+                      <div className="font-semibold text-[var(--accent)]">Your Guess</div>
+                      <div className="text-sm text-[color:rgba(151,255,151,0.9)]">{formatDistance(result.distance)} away</div>
                     </Popup>
                   </Marker>
 
-                  <Polyline positions={linePositions} color="blue" weight={2} opacity={0.7} dashArray="10, 10" />
+                  <Polyline positions={linePositions} pathOptions={{ color: "#00ff41", weight: 2, opacity: 0.9, dashArray: "10 10", className: "mx-polyline" }} />
                 </MapContainer>
               )}
             </motion.div>
@@ -176,7 +159,7 @@ export default function ResultsScreen({ result, onNext, isLastRound }: ResultsSc
               <Button
                 onClick={onNext}
                 size="lg"
-                className="w-full h-14 text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                className="w-full h-14 text-lg"
               >
                 {isLastRound ? "View Final Results" : "Next Round"}
                 <ArrowRight className="w-5 h-5 ml-2" />

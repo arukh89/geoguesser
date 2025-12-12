@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Share_Tech_Mono } from "next/font/google";
 import { ResponseLogger } from "@/components/response-logger";
 import { cookies } from "next/headers";
 import { ReadyNotifier } from "@/components/ready-notifier";
 import { Providers } from "./providers";
 import FarcasterWrapper from "@/components/FarcasterWrapper";
 
+
+const mono = Share_Tech_Mono({ subsets: ["latin"], weight: "400" });
 
 export default async function RootLayout({
   children,
@@ -15,11 +18,12 @@ export default async function RootLayout({
   const requestId = (await cookies()).get("x-request-id")?.value;
 
   return (
-        <html lang="en">
+        <html lang="en" data-theme="matrix">
           <head>
             {requestId && <meta name="x-request-id" content={requestId} />}
+            <meta name="theme-color" content="#000000" />
           </head>
-          <body className={`antialiased`}>
+          <body className={`antialiased ${mono.className}`}>
             {/* Do not remove this component, we use it to notify the parent that the mini-app is ready */}
             <ReadyNotifier />
             <Providers>

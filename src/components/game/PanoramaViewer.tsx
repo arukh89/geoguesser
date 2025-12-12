@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { Info } from 'lucide-react';
 import { Attribution } from './Attribution';
+import MatrixRain from '@/components/matrix/MatrixRain';
 
 type Shot = { provider: 'mapillary'|'kartaview'; imageId?: string; imageUrl?: string };
 
@@ -88,6 +89,8 @@ export default function PanoramaViewer({ imageUrl, shot, onLoad, allowMove = tru
 
   return (
     <div className="relative w-full h-full bg-black">
+      {/* Digital rain overlay (disabled if user prefers reduced motion via provider) */}
+      <MatrixRain />
       {shot?.provider === 'mapillary' && shot.imageId ? (
         <DynamicMapillary imageId={shot.imageId} allowMove={allowMove} />
       ) : shot?.provider === 'kartaview' && (shot.imageUrl || imageUrl) ? (
@@ -106,6 +109,11 @@ export default function PanoramaViewer({ imageUrl, shot, onLoad, allowMove = tru
           {!allowMove && (
             <div className="absolute inset-0 bg-transparent" style={{ pointerEvents: 'auto' }} />
           )}
+          {/* Scanline + vignette overlays */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08]" style={{
+            backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,255,65,0.18) 2px 3px)'
+          }} />
+          <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_100%,rgba(0,0,0,.6),transparent)]" />
         </div>
       ) : (
         <div
@@ -129,6 +137,11 @@ export default function PanoramaViewer({ imageUrl, shot, onLoad, allowMove = tru
               {!allowMove && (
                 <div className="absolute inset-0 bg-transparent" style={{ pointerEvents: 'auto' }} />
               )}
+              {/* Overlays */}
+              <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08]" style={{
+                backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,255,65,0.18) 2px 3px)'
+              }} />
+              <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_100%,rgba(0,0,0,.6),transparent)]" />
             </div>
           )}
         </div>
@@ -141,9 +154,9 @@ export default function PanoramaViewer({ imageUrl, shot, onLoad, allowMove = tru
       )}
 
       {isLegacy && (
-        <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white px-4 py-2 rounded-lg flex items-center gap-2">
-          <Info className="w-4 h-4" />
-          <span className="text-sm">Drag to look around</span>
+        <div className="absolute top-4 left-4 mx-panel px-4 py-2 rounded-lg flex items-center gap-2">
+          <Info className="w-4 h-4 text-[var(--accent)]" />
+          <span className="text-sm text-[color:rgba(151,255,151,0.9)]">Drag to look around</span>
         </div>
       )}
     </div>
