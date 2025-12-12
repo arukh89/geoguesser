@@ -20,7 +20,16 @@ export default function Leaderboard({ currentScore }: LeaderboardProps) {
     let cancelled = false;
     const connect = async () => {
       try {
-        const uri = process.env.NEXT_PUBLIC_STDB_URI ?? "http://127.0.0.1:3000";
+        const uri = process.env.NEXT_PUBLIC_STDB_URI ?? "http://127.0.0.1:3010";
+        
+        // Runtime guard: detect port collision with Next.js dev server
+        if (uri.includes(":3000") && typeof window !== "undefined") {
+          console.warn(
+            "⚠️ STDB URI uses port 3000 which conflicts with Next.js dev server. " +
+            "Set NEXT_PUBLIC_STDB_URI=http://127.0.0.1:3010 in .env to fix this."
+          );
+        }
+        
         const conn = DbConnection.builder().withUri(uri).withModuleName("leaderboard").withLightMode(true).build();
         connRef.current = conn;
 

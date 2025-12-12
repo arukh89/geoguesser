@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import type { LatLngExpression } from 'leaflet';
 import '@/lib/leaflet.config';
 import { Button } from '@/components/ui/button';
@@ -16,15 +16,6 @@ interface WorldMapProps {
 interface MapPosition {
   lat: number;
   lng: number;
-}
-
-function ClickHandler({ onClick }: { onClick: (pos: MapPosition) => void }) {
-  useMapEvents({
-    click(e) {
-      onClick({ lat: e.latlng.lat, lng: e.latlng.lng });
-    },
-  });
-  return null;
 }
 
 function AutoResize({ active }: { active?: boolean }) {
@@ -131,10 +122,9 @@ export default function WorldMap({ onGuess, disabled = false, active }: WorldMap
           />
         )}
 
-        {/* Prefer a full-surface click capture to avoid timing issues in headless */}
+        /* Use ClickCapture overlay for consistent click handling */
         <ClickCapture onPick={handlePositionClick} />
         <DefaultPositionOnActive active={active} onSet={(p) => setPosition((prev) => prev ?? p)} />
-        <ClickHandler onClick={handlePositionClick} />
 
         {position && (
           <Marker position={[position.lat, position.lng]}>
