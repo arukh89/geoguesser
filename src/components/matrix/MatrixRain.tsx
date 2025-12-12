@@ -70,7 +70,7 @@ export default function MatrixRain({ className = "" }: { className?: string }) {
   return (
     <canvas
       ref={canvasRef}
-      className={`pointer-events-none absolute inset-0 opacity-[0.2] ${className}`}
+      className={`pointer-events-none fixed inset-0 opacity-[0.2] ${className}`}
       aria-hidden
     />
   );

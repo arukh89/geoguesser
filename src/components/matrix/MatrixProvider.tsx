@@ -22,16 +22,18 @@ export function useMatrix() {
 }
 
 export function MatrixProvider({ children }: { children: React.ReactNode }) {
+  // Always enable rain by default regardless of OS reduced‑motion setting,
+  // per design requirement that raindrop is visible on all pages.
   const prefersReduced = usePrefersReducedMotion();
   const [settings, setState] = useState<MatrixSettings>({
-    rain: !prefersReduced,
+    rain: true,
     glitch: !prefersReduced,
     crt: true,
   });
 
   const effective = useMemo<MatrixSettings>(
     () => ({
-      rain: settings.rain && !prefersReduced,
+      rain: settings.rain,
       glitch: settings.glitch && !prefersReduced,
       crt: settings.crt,
     }),
