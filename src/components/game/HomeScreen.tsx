@@ -17,7 +17,7 @@ export default function HomeScreen({ onStart }: HomeScreenProps) {
   ];
   const start = (m: 'classic'|'no-move'|'time-attack', d?: number) => onStart(m, d);
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex items-center justify-center p-4 pt-16 md:pt-4 relative overflow-hidden">
+    <div className="min-h-screen text-[var(--text)] flex items-center justify-center p-4 pt-16 md:pt-4 relative overflow-hidden">
       {/* subtle scanline overlay */}
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.04]" style={{
         backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0 1px, rgba(0,255,65,0.12) 1px 2px)'

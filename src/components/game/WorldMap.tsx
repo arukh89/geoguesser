@@ -108,7 +108,7 @@ export default function WorldMap({ onGuess, disabled = false, active }: WorldMap
   const center: LatLngExpression = [20, 0];
 
   return (
-    <div className="relative w-full h-full bg-black">
+    <div className="relative w-full h-full">
       <MapContainer
         center={center}
         zoom={2}
