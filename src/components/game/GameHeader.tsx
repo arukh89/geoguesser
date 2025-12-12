@@ -43,7 +43,7 @@ export default function GameHeader({ currentRound, totalRounds, score, timeLeftS
                 <span className="font-semibold">Time</span>
                 <span className={`ml-2 font-mono inline-flex items-center gap-1 ${timeClass(timeLeftSec)}`}>
                   <Timer className="w-4 h-4" />
-                  {Math.max(0, Math.floor(timeLeftSec))} s
+                  {Math.max(0, Math.floor(timeLeftSec))}s
                 </span>
               </div>
             )}
