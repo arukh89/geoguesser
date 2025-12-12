@@ -90,7 +90,6 @@
     "@playwright/test": "^1.49.0",
     "@storybook/addon-a11y": "^10.1.7",
     "@storybook/addon-links": "^10.1.7",
-    "@storybook/addon-vitest": "^10.1.7",
     "@storybook/nextjs-vite": "^10.1.7",
     "@types/date-fns": "^2.6.3",
     "@types/geojson": "^7946.0.16",
