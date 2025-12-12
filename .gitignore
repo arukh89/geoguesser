@@ -23,3 +23,4 @@ Thumbs.db
 *.local
 .cursor/
 stdb/**/target/
+storybook-static/
