@@ -3,7 +3,6 @@ let L: any = undefined;
 
 if (typeof window !== 'undefined') {
   L = require('leaflet');
-  require('leaflet/dist/leaflet.css');
 
   // Fix Leaflet's default icon paths for Next.js
   const DefaultIcon = L.Icon.Default;

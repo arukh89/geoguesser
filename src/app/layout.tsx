@@ -22,6 +22,8 @@ export default async function RootLayout({
           <head>
             {requestId && <meta name="x-request-id" content={requestId} />}
             <meta name="theme-color" content="#000000" />
+            {/* Leaflet CSS via CDN to avoid Turbopack HMR CSS module issue in dev */}
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossOrigin="" />
           </head>
           <body className={`antialiased ${mono.className}`}>
             {/* Do not remove this component, we use it to notify the parent that the mini-app is ready */}
