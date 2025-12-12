@@ -22,12 +22,7 @@ html[data-theme="matrix"] {
 }
 
 /* Base body styles */
-html[data-theme="matrix"] body {
-  color: var(--text);
-  background: radial-gradient(1200px 800px at 10% 10%, #001b08 0%, transparent 40%),
-              radial-gradient(1200px 800px at 90% 90%, #001b08 0%, transparent 40%),
-              var(--bg);
-}
+html[data-theme="matrix"] body { color: var(--text); background: var(--bg); }
 
 /* Selection */
 html[data-theme="matrix"] ::selection {

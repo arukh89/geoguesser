@@ -7,6 +7,8 @@ import GameHeader from '@/components/game/GameHeader';
 import PanoramaViewer from '@/components/game/PanoramaViewer';
 import ResultsScreen from '@/components/game/ResultsScreen';
 import FinalResults from '@/components/game/FinalResults';
+import MissionNav from '@/components/game/MissionNav';
+import StartupSplash from '@/components/matrix/StartupSplash';
 import { getRandomLocations } from '@/lib/game/locations';
 import { calculateDistance, calculateScore } from '@/lib/game/scoring';
 import { toast } from 'sonner';
@@ -104,7 +106,9 @@ export default function GeoExplorerGame() {
 
   const [currentScreen, setCurrentScreen] = useState<GameScreen>('home');
   const [showMap, setShowMap] = useState<boolean>(false);
+  const [showViewer, setShowViewer] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showSplash, setShowSplash] = useState<boolean>(true);
 
   async function fetchRandomShot() {
     const base = process.env.NEXT_PUBLIC_BASE_URL ?? '';
@@ -290,14 +294,25 @@ export default function GeoExplorerGame() {
   const currentRoundResult = gameState.roundScores[gameState.roundScores.length - 1];
 
   return (
-    <main className="min-h-screen bg-[var(--bg)] text-[var(--text)] relative">
+    <main className="min-h-screen text-[var(--text)] relative">
       {loading && (
         <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center">
           <MatrixLoader label="Initializing..." />
         </div>
       )}
-      {currentScreen === 'home' && (
-        <HomeScreen onStart={startGame} />
+      {showSplash && <StartupSplash onDone={() => setShowSplash(false)} />}
+
+      {!showSplash && currentScreen === 'home' && (
+        <>
+          {/* Left sidebar like Mapillary on Home */}
+          <div className="hidden md:block fixed left-4 top-[84px] z-[90]">
+            <MissionNav
+              onExplore={() => setShowMap(true)}
+              onLeaderboard={() => setCurrentScreen('results')}
+            />
+          </div>
+          <HomeScreen onStart={startGame} />
+        </>
       )}
 
       {currentScreen === 'playing' && gameState.currentLocation && (
@@ -309,36 +324,67 @@ export default function GeoExplorerGame() {
             timeLeftSec={gameState.mode === 'time-attack' ? gameState.timeLeftSec : undefined}
           />
 
-          <div className="h-[calc(100vh-73px)] flex flex-col md:flex-row">
-            {/* Panorama Viewer */}
-            <div className={`${showMap ? 'hidden' : 'flex'} flex-1 relative`}>
-              <PanoramaViewer
-                imageUrl={gameState.currentLocation.panoramaUrl}
-                shot={gameState.currentLocation.provider ? {
-                  provider: gameState.currentLocation.provider as 'mapillary'|'kartaview',
-                  imageId: gameState.currentLocation.imageId,
-                  imageUrl: gameState.currentLocation.imageUrl,
-                } : undefined}
-                allowMove={gameState.mode !== 'no-move'}
+          <div className="h-[calc(100vh-73px)] relative">
+            {/* Left sidebar like Mapillary */}
+            <div className="hidden md:block fixed left-4 top-[84px] z-[90]">
+              <MissionNav
+                onExplore={() => setShowMap(true)}
+                onLeaderboard={() => setCurrentScreen('results')}
               />
-              
-              <Button
-                onClick={showMapNow}
-                size="lg"
-                className="absolute bottom-4 right-4 z-10"
-                aria-label="Make a Guess"
-              >
-                Make a Guess
-              </Button>
+            </div>
+            {/* Open map overlay when guessing */}
+            <div className={`${showMap ? 'fixed inset-0 z-[100] flex items-center justify-center' : 'hidden'}`}>
+              {/* Centered map card to keep Matrix rain visible around edges */}
+              <div className="relative w-[min(1200px,95vw)] h-[min(770px,85vh)] rounded-2xl overflow-hidden mx-panel" data-testid="map-overlay">
+                <div className="absolute top-3 right-3 z-[5]">
+                  <Button onClick={hideMapNow} size="md" variant="secondary" aria-label="Close Map">Close</Button>
+                </div>
+                <WorldMap onGuess={handleGuess} active={showMap} />
+
+                {/* Mission image preview; click to open full-screen viewer */}
+                <button
+                  type="button"
+                  onClick={() => setShowViewer(true)}
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[6] w-[min(520px,33vw)] h-[min(280px,16.6vh)] rounded-xl overflow-hidden mx-panel"
+                  aria-label="Open mission image"
+                >
+                  <PanoramaViewer
+                    imageUrl={gameState.currentLocation.panoramaUrl}
+                    shot={gameState.currentLocation.provider ? {
+                      provider: gameState.currentLocation.provider as 'mapillary'|'kartaview',
+                      imageId: gameState.currentLocation.imageId,
+                      imageUrl: gameState.currentLocation.imageUrl,
+                    } : undefined}
+                    allowMove={false}
+                  />
+                </button>
+              </div>
             </div>
 
-            {/* Map as full-screen overlay when visible to avoid layout issues */}
-            <div className={`${showMap ? 'fixed inset-0 z-[100]' : 'hidden'} bg-black`} data-testid="map-overlay">
-              <div className="absolute top-4 right-4 z-[1001]">
-                <Button onClick={hideMapNow} size="md" variant="secondary" aria-label="Close Map">Close</Button>
+            {/* Full-screen image viewer overlay */}
+            <div className={`${showViewer ? 'fixed inset-0 z-[110] bg-black' : 'hidden'}`}>
+              <div className="absolute top-4 right-4 z-[111]">
+                <Button onClick={() => setShowViewer(false)} size="md" variant="secondary" aria-label="Close Image">Close</Button>
               </div>
-              <WorldMap onGuess={handleGuess} active={showMap} />
+              <div className="absolute inset-0">
+                <PanoramaViewer
+                  imageUrl={gameState.currentLocation.panoramaUrl}
+                  shot={gameState.currentLocation.provider ? {
+                    provider: gameState.currentLocation.provider as 'mapillary'|'kartaview',
+                    imageId: gameState.currentLocation.imageId,
+                    imageUrl: gameState.currentLocation.imageUrl,
+                  } : undefined}
+                  allowMove={gameState.mode !== 'no-move'}
+                />
+              </div>
             </div>
+
+            {/* Idle state before opening the map: show CTA */}
+            {!showMap && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Button onClick={showMapNow} size="lg" aria-label="Make a Guess">Make a Guess</Button>
+              </div>
+            )}
           </div>
         </>
       )}
