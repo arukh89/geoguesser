@@ -2,6 +2,7 @@
 
 import { Trophy, MapPin, Timer } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { MatrixToggle } from '@/components/matrix/MatrixToggle';
 
 interface GameHeaderProps {
   currentRound: number;
@@ -42,7 +43,7 @@ export default function GameHeader({ currentRound, totalRounds, score, timeLeftS
                 <span className="font-semibold">Time</span>
                 <span className={`ml-2 font-mono inline-flex items-center gap-1 ${timeClass(timeLeftSec)}`}>
                   <Timer className="w-4 h-4" />
-                  {Math.max(0, Math.floor(timeLeftSec))} s
+                  {Math.max(0, Math.floor(timeLeftSec))}s
                 </span>
               </div>
             )}
@@ -55,6 +56,10 @@ export default function GameHeader({ currentRound, totalRounds, score, timeLeftS
                   {score.toLocaleString()}
                 </span>
               </div>
+            </div>
+
+            <div className="hidden md:block pl-4">
+              <MatrixToggle />
             </div>
           </div>
 

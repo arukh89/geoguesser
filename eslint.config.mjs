@@ -1,10 +1,14 @@
 import coreWebVitals from 'eslint-config-next/core-web-vitals';
 
-export default [
+const config = [
   ...coreWebVitals,
   {
     ignores: [
-      'src/spacetime/**'
+      'src/spacetime/**',
+      'storybook-static/**',
+      'test-results/**'
     ],
   },
 ];
+
+export default config;

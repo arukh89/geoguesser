@@ -81,47 +81,37 @@ export default function Leaderboard({ currentScore }: LeaderboardProps) {
   const getMedalIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Trophy className="w-6 h-6 text-yellow-500" />;
+        return <Trophy className="w-6 h-6 text-[var(--accent)]" />;
       case 2:
-        return <Medal className="w-6 h-6 text-gray-400" />;
+        return <Medal className="w-6 h-6 text-[color:rgba(151,255,151,0.85)]" />;
       case 3:
-        return <Award className="w-6 h-6 text-orange-600" />;
+        return <Award className="w-6 h-6 text-[var(--accent)]" />;
       default:
-        return <div className="w-6 h-6 flex items-center justify-center text-gray-500 font-semibold">{rank}</div>;
+        return <div className="w-6 h-6 flex items-center justify-center text-[color:rgba(151,255,151,0.7)] font-semibold">{rank}</div>;
     }
   };
 
-  const getRankColor = (rank: number): string => {
-    switch (rank) {
-      case 1:
-        return 'bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-300';
-      case 2:
-        return 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-300';
-      case 3:
-        return 'bg-gradient-to-r from-orange-50 to-orange-100 border-orange-300';
-      default:
-        return 'bg-white border-gray-200';
-    }
-  };
+  const getRankColor = (rank: number): string =>
+    'bg-[rgba(0,255,65,0.06)] border-[rgba(0,255,65,0.25)]';
 
   return (
-    <Card className="border-2 shadow-lg">
-      <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+    <Card className="mx-panel border mx-border shadow-[var(--shadow)]">
+      <CardHeader className="border-b mx-border text-[var(--text)] bg-[rgba(0,255,65,0.06)]">
         <CardTitle className="text-2xl flex items-center gap-2">
           <TrendingUp className="w-6 h-6" />
           {remoteEntries && remoteEntries.length > 0 ? "Live Leaderboard" : "Leaderboard (connect STDB)"}
         </CardTitle>
-        <CardDescription className="text-purple-100">
+        <CardDescription>
           {remoteEntries && remoteEntries.length > 0
             ? "Real-time scores from SpacetimeDB"
             : "No data. Start SpacetimeDB to enable live leaderboard."}
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="p-6">
+      <CardContent className="p-6 text-[var(--text)]">
         {sortedEntries.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <Trophy className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+          <div className="text-center py-8 text-[color:rgba(151,255,151,0.7)]">
+            <Trophy className="w-12 h-12 mx-auto mb-3 text-[color:rgba(151,255,151,0.35)]" />
             <p>No scores yet. Be the first to play!</p>
           </div>
         ) : (
@@ -136,8 +126,8 @@ export default function Leaderboard({ currentScore }: LeaderboardProps) {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className={`p-4 rounded-lg border-2 ${getRankColor(rank)} ${
-                    isCurrentScore ? 'ring-2 ring-blue-500' : ''
+                  className={`p-4 rounded-lg border ${getRankColor(rank)} ${
+                    isCurrentScore ? 'ring-2 ring-[var(--accent)]' : ''
                   }`}
                 >
                   <div className="flex items-center gap-4">
@@ -146,19 +136,19 @@ export default function Leaderboard({ currentScore }: LeaderboardProps) {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-gray-900 truncate">
+                      <div className="font-semibold truncate text-[var(--text)]">
                         {entry.playerName}
                       </div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-[color:rgba(151,255,151,0.8)]">
                         {entry.rounds} rounds • Avg {entry.averageDistance}km
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <div className="text-xl font-bold text-gray-900">
+                      <div className="text-xl font-bold text-[var(--accent)]">
                         {entry.score.toLocaleString()}
                       </div>
-                      <div className="text-xs text-gray-500">points</div>
+                      <div className="text-xs text-[color:rgba(151,255,151,0.7)]">points</div>
                     </div>
                   </div>
                 </motion.div>
@@ -168,8 +158,8 @@ export default function Leaderboard({ currentScore }: LeaderboardProps) {
         )}
 
         {!remoteEntries || remoteEntries.length === 0 ? (
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-sm text-blue-800">
+          <div className="mt-6 p-4 rounded-lg border mx-border bg-[rgba(0,255,65,0.06)]">
+            <p className="text-sm text-[color:rgba(151,255,151,0.9)]">
               <strong>Note:</strong> No entries yet. Start SpacetimeDB at {`$`}{"{"}NEXT_PUBLIC_STDB_URI{"}"} and play to populate the leaderboard.
             </p>
           </div>
