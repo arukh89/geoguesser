@@ -18,14 +18,18 @@ interface MissionNavProps {
 }
 
 export default function MissionNav({ onExplore, onProfile, onLeaderboard }: MissionNavProps) {
-  const items: Item[] = useMemo(() => [
-    { key: 'explore', label: 'Explore', icon: <Home className="w-5 h-5" />, onClick: () => onExplore?.() },
-    { key: 'profile', label: 'Profile', icon: <User className="w-5 h-5" />, onClick: () => onProfile?.() },
-    { key: 'leaderboard', label: 'Leaderboard', icon: <Trophy className="w-5 h-5" />, onClick: () => onLeaderboard?.() },
-    { key: 'upload', label: 'Upload', icon: <Upload className="w-5 h-5" />, onClick: () => window.open('https://www.mapillary.com/desktop-uploader', '_blank') },
-    { key: 'blog', label: 'Blog', icon: <BookText className="w-5 h-5" />, onClick: () => window.open('https://blog.mapillary.com/', '_blank') },
-    { key: 'website', label: 'Mapillary.com', icon: <ExternalLink className="w-5 h-5" />, onClick: () => window.open('https://www.mapillary.com/', '_blank') },
-  ], [onExplore, onProfile, onLeaderboard]);
+  const items: Item[] = useMemo(() => {
+    const allItems = [
+      { key: 'explore', label: 'Explore', icon: <Home className="w-5 h-5" />, onClick: () => onExplore?.() },
+      // Profile: only show if handler is provided
+      ...(onProfile ? [{ key: 'profile', label: 'Profile', icon: <User className="w-5 h-5" />, onClick: onProfile }] : []),
+      { key: 'leaderboard', label: 'Leaderboard', icon: <Trophy className="w-5 h-5" />, onClick: () => onLeaderboard?.() },
+      { key: 'upload', label: 'Upload', icon: <Upload className="w-5 h-5" />, onClick: () => window.open('https://www.mapillary.com/desktop-uploader', '_blank') },
+      { key: 'blog', label: 'Blog', icon: <BookText className="w-5 h-5" />, onClick: () => window.open('https://blog.mapillary.com/', '_blank') },
+      { key: 'website', label: 'Mapillary.com', icon: <ExternalLink className="w-5 h-5" />, onClick: () => window.open('https://www.mapillary.com/', '_blank') },
+    ];
+    return allItems;
+  }, [onExplore, onProfile, onLeaderboard]);
 
   return (
     <nav className="w-16 px-2 py-3 rounded-2xl mx-panel text-[var(--text)] flex flex-col items-center gap-3">

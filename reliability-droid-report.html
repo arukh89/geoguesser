@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alert Investigation Report</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; background-color: #fff; max-width: 1200px; margin: 0 auto; padding: 20px; }
+    h1, h2, h3 { margin-top: 1.5em; margin-bottom: 0.5em; page-break-after: avoid; }
+    h1 { font-size: 24px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+    h2 { font-size: 20px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+    .header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 3px solid #eee; padding-bottom: 15px; }
+    .header-left { flex: 1; }
+    .header-right { flex: 1; text-align: right; }
+    .severity-badge { display: inline-block; padding: 5px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; }
+    .sev-1 { background-color: #d9534f; color: white; }
+    .sev-2 { background-color: #f0ad4e; color: white; }
+    .sev-3 { background-color: #f7e58d; color: #333; }
+    .section { margin-bottom: 30px; page-break-inside: avoid; }
+    pre { background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; padding: 10px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 14px; page-break-inside: avoid; }
+    details { margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; padding: 10px; background-color: #f9f9f9; }
+    summary { font-weight: bold; cursor: pointer; }
+    img { max-width: 100%; height: auto; border: 1px solid #ddd; margin: 10px 0; page-break-inside: avoid; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .timeline { margin-left: 20px; }
+    .timeline-item { margin-bottom: 15px; position: relative; }
+    .timeline-time { font-weight: bold; margin-right: 10px; }
+    .timeline-content { margin-left: 10px; }
+    .fix-steps { list-style-type: decimal; padding-left: 20px; }
+    .fix-step { margin-bottom: 15px; }
+    .footer { margin-top: 40px; border-top: 1px solid #eee; padding-top: 10px; font-size: 12px; color: #777; text-align: center; }
+    .replace-note { background-color: #fffacd; padding: 2px 4px; border-radius: 3px; font-style: italic; font-size: 0.9em; color: #555; }
+  </style>
+</head>
+<body>
+  <div class="header" id="header">
+    <div class="header-left">
+      <h1>Alert Investigation Geo Detective local UI + Spacetime server</h1>
+      <div>
+        <span class="severity-badge sev-3">SEV-3</span>
+        <span>Started: <span id="start-time">2025-12-12</span></span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div>On-call: <strong id="oncall-engineer">Asep Asep</strong></div>
+    </div>
+  </div>
+  <div class="section" id="exec-summary">
+    <h2>Executive Summary</h2>
+    <p>Because SpacetimeDB and Next.js both default to port 3000, running both locally caused a port collision. Separately, home/results layout issues came from missing full-viewport background layering and oversized image overlays. We configured SpacetimeDB on 127.0.0.1:3010 and pointed the app via <code>.env.local</code>, rendered MatrixRain as a fixed, full-viewport background globally, centered startup/home content, added a Mapillary-style left sidebar, and constrained the mission image preview to ~1/6 viewport height so the map remains fully visible. All changes were done locally with hot reload; no GitHub changes.</p>
+  </div>
+  <div class="section" id="rca">
+    <h2>Root Cause Analysis</h2>
+    <div>
+      <p>Suspected root cause:</p>
+      <ul>
+        <li><strong>Primary Hypothesis:</strong> Default port collision (Next dev on 3000 vs SpacetimeDB default 3000) and missing CSS constraints for background/overlay sizing.</li>
+        <li><strong>Contributing Factors:</strong> App fallback STDB URI defaulted to 3000; Matrix rain previously not guaranteed globally; image overlay lacked a hard height cap.</li>
+      </ul>
+      <h3>Evidence</h3>
+      <h4>Local Port Evidence</h4>
+      <details>
+        <summary>netstat results</summary>
+        <pre>
+TCP 0.0.0.0:3000 LISTENING PID=node (Next.js dev)
+TCP 127.0.0.1:3010 LISTENING PID=spacetimedb-standalone (SpacetimeDB)
+        </pre>
+      </details>
+      <h4>Code Reference</h4>
+      <p>Global background in <a href="#">src/app/layout.tsx</a>:</p>
+      <pre>{`<MatrixRain className="z-0 opacity-[0.15]" />`}</pre>
+      <p>Full-screen preview cap and centering in <a href="#">src/app/page.tsx</a> (map overlay):</p>
+      <pre>{`className="... w-[min(520px,33vw)] h-[min(280px,16.6vh)] ..."`}</pre>
+      <p>Home centering in <a href="#">src/components/game/HomeScreen.tsx</a>:</p>
+      <pre>{`<div className="min-h-screen ... flex items-center justify-center ...">`}</pre>
+      <p>SpacetimeDB URI in <a href="#">.env.local</a>:</p>
+      <pre>NEXT_PUBLIC_STDB_URI=http://127.0.0.1:3010</pre>
+      <p>STDB default port/override (CLI):</p>
+      <pre>spacetime start -- --help  # default 0.0.0.0:3000; use -l 127.0.0.1:3010</pre>
+      <h4>Dashboard Evidence</h4>
+      <p>Sidebar pattern reference: <a href="https://www.mapillary.com/app/user/arukh89?menu=true&lat=9.524592597103648&lng=-2.4422769157357607&z=1.2005859375">Mapillary user page</a></p>
+    </div>
+  </div>
+  <div class="section" id="fix-proposal">
+    <h2>Proposed Fix</h2>
+    <ol class="fix-steps">
+      <li class="fix-step">
+        <strong>Immediate Mitigation:</strong> Run SpacetimeDB on 127.0.0.1:3010 (not 3000) and set <code>NEXT_PUBLIC_STDB_URI</code> accordingly.
+        <div>Validation: netstat shows 3000 (Next) and 3010 (SpacetimeDB) without conflict.</div>
+      </li>
+      <li class="fix-step">
+        <strong>Short-term Fix:</strong> Keep MatrixRain as fixed full-viewport in layout; ensure home/startup containers use <code>min-h-screen flex items-center justify-center</code>; cap mission image preview to <code>~16.6vh</code> and center on the map overlay; keep Mapillary-style left sidebar on home.
+        <div>Validation: Visual check in browser; HMR applies without GitHub changes.</div>
+      </li>
+      <li class="fix-step">
+        <strong>Long-term Solution:</strong> Add UI snapshot tests for layout (home/results/overlay), a dev port preflight check to auto-pick free ports, and a config guard to prevent STDB/Next port collisions.
+        <div>Validation: CI passes visual diffs; dev startup logs warn on conflicts and auto-resolve.</div>
+      </li>
+    </ol>
+  </div>
+  <div class="section" id="timeline">
+    <h2>Incident Timeline</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <span class="timeline-time">Now</span>
+        <div class="timeline-content">
+          Verified Next dev listening on 3000; SpacetimeDB already running on 3010; .env.local set to 3010.
+          <div>Log: netstat outputs above</div>
+          <div>Code: .env.local, layout.tsx, page.tsx, HomeScreen.tsx</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <p>Generated: <span id="generation-date">2025-12-12</span></p>
+  </div>
+</body>
+</html>

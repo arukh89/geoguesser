@@ -7,7 +7,7 @@ import { Trophy, MapPin, Target, Share2, RotateCcw, TrendingUp } from 'lucide-re
 import type { RoundResult } from '@/lib/game/types';
 import { formatDistance, calculateAverageDistance } from '@/lib/game/scoring';
 import Leaderboard from './Leaderboard';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { DbConnection } from '@/spacetime';
 
 interface FinalResultsProps {
@@ -69,11 +69,29 @@ export default function FinalResults({
 
   const performance = getPerformanceLevel(accuracyPercentage);
 
+  // Idempotency guard: track if score has already been submitted
+  const submittedRef = useRef(false);
+
   // Submit score to SpacetimeDB once when final results are shown (best-effort)
   useEffect(() => {
+    // Prevent duplicate submissions on remounts or hot reloads
+    if (submittedRef.current) {
+      return;
+    }
+    submittedRef.current = true;
+
     const submit = async () => {
       try {
-        const uri = process.env.NEXT_PUBLIC_STDB_URI ?? 'http://127.0.0.1:3000';
+        const uri = process.env.NEXT_PUBLIC_STDB_URI ?? 'http://127.0.0.1:3010';
+        
+        // Runtime guard: detect port collision with Next.js dev server
+        if (uri.includes(':3000') && typeof window !== 'undefined') {
+          console.warn(
+            '⚠️ STDB URI uses port 3000 which conflicts with Next.js dev server. ' +
+            'Set NEXT_PUBLIC_STDB_URI=http://127.0.0.1:3010 in .env to fix this.'
+          );
+        }
+        
         const conn = DbConnection.builder()
           .withUri(uri)
           .withModuleName('leaderboard')
