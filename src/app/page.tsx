@@ -303,7 +303,16 @@ export default function GeoExplorerGame() {
       {showSplash && <StartupSplash onDone={() => setShowSplash(false)} />}
 
       {!showSplash && currentScreen === 'home' && (
-        <HomeScreen onStart={startGame} />
+        <>
+          {/* Left sidebar like Mapillary on Home */}
+          <div className="hidden md:block fixed left-4 top-[84px] z-[90]">
+            <MissionNav
+              onExplore={() => setShowMap(true)}
+              onLeaderboard={() => setCurrentScreen('results')}
+            />
+          </div>
+          <HomeScreen onStart={startGame} />
+        </>
       )}
 
       {currentScreen === 'playing' && gameState.currentLocation && (
@@ -336,7 +345,7 @@ export default function GeoExplorerGame() {
                 <button
                   type="button"
                   onClick={() => setShowViewer(true)}
-                  className="absolute left-1/2 top-8 -translate-x-1/2 z-[6] w-[360px] h-[220px] rounded-xl overflow-hidden mx-panel"
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[6] w-[min(520px,33vw)] h-[min(280px,16.6vh)] rounded-xl overflow-hidden mx-panel"
                   aria-label="Open mission image"
                 >
                   <PanoramaViewer
