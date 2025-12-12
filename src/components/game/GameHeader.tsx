@@ -1,6 +1,6 @@
 "use client";
 
-import { Trophy, MapPin } from 'lucide-react';
+import { Trophy, MapPin, Timer } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 interface GameHeaderProps {
@@ -13,19 +13,19 @@ interface GameHeaderProps {
 export default function GameHeader({ currentRound, totalRounds, score, timeLeftSec }: GameHeaderProps) {
   const progress = (currentRound / totalRounds) * 100;
   const timeClass = (time?: number) => {
-    if (typeof time !== 'number') return 'text-gray-600';
-    return time <= 5 ? 'text-red-600' : 'text-gray-600';
+    if (typeof time !== 'number') return 'text-[color:rgba(151,255,151,0.8)]';
+    return time <= 5 ? 'text-red-500' : 'text-[color:rgba(151,255,151,0.9)]';
   };
   return (
-    <div className="bg-white border-b-2 border-gray-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 py-3">
+    <div className="bg-[var(--panel)] border-b mx-border shadow-[var(--shadow)]">
+      <div className="max-w-7xl mx-auto px-4 py-3 text-[var(--text)]">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-blue-600" />
+              <MapPin className="w-5 h-5 text-[var(--accent)]" />
               <div className="text-sm">
-                <span className="font-semibold text-gray-900">Round</span>
-                <span className="ml-2 text-gray-600">
+                <span className="font-semibold">Round</span>
+                <span className="ml-2 text-[color:rgba(151,255,151,0.85)] font-mono">
                   {currentRound} / {totalRounds}
                 </span>
               </div>
@@ -39,18 +39,19 @@ export default function GameHeader({ currentRound, totalRounds, score, timeLeftS
           <div className="flex items-center gap-4">
             {typeof timeLeftSec === 'number' && (
               <div className="text-sm">
-                <span className="font-semibold text-gray-900">Time</span>
-                <span className={`ml-2 font-mono ${timeClass(timeLeftSec)}`}>
-                  {Math.max(0, Math.floor(timeLeftSec))}s
+                <span className="font-semibold">Time</span>
+                <span className={`ml-2 font-mono inline-flex items-center gap-1 ${timeClass(timeLeftSec)}`}>
+                  <Timer className="w-4 h-4" />
+                  {Math.max(0, Math.floor(timeLeftSec))} s
                 </span>
               </div>
             )}
 
             <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-yellow-600" />
+              <Trophy className="w-5 h-5 text-[var(--accent)]" />
               <div className="text-sm">
-                <span className="font-semibold text-gray-900">Score</span>
-                <span className="ml-2 text-gray-600 font-mono">
+                <span className="font-semibold">Score</span>
+                <span className="ml-2 font-mono text-[color:rgba(151,255,151,0.9)]">
                   {score.toLocaleString()}
                 </span>
               </div>

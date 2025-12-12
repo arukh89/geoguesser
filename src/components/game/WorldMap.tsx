@@ -108,7 +108,7 @@ export default function WorldMap({ onGuess, disabled = false, active }: WorldMap
   const center: LatLngExpression = [20, 0];
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full bg-black">
       <MapContainer
         center={center}
         zoom={2}
@@ -118,8 +118,9 @@ export default function WorldMap({ onGuess, disabled = false, active }: WorldMap
       >
         <AutoResize active={active} />
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          subdomains={['a','b','c','d'] as any}
         />
 
         {/* Prefer a full-surface click capture to avoid timing issues in headless */}
@@ -145,7 +146,7 @@ export default function WorldMap({ onGuess, disabled = false, active }: WorldMap
           <Button
             onClick={handleConfirmGuess}
             size="lg"
-            className="bg-green-600 hover:bg-green-700 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!position}
           >
             <MapPin className="w-4 h-4 mr-2" />
@@ -162,8 +163,10 @@ export default function WorldMap({ onGuess, disabled = false, active }: WorldMap
               Clear
             </Button>
           )}
-          <div className="bg-white px-4 py-2 rounded-lg shadow-lg text-sm text-gray-600">
-            {position ? 'Click the map to adjust your guess' : 'Click on the map to place your guess'}
+          <div className="px-4 py-2 rounded-lg shadow-lg text-sm mx-panel">
+            <span className="text-[color:rgba(151,255,151,0.9)]">
+              {position ? 'Click the map to adjust your guess' : 'Click on the map to place your guess'}
+            </span>
           </div>
         </div>
       )}

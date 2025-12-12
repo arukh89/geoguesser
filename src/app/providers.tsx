@@ -1,3 +1,7 @@
+"use client";
+
+import { MatrixProvider } from "@/components/matrix/MatrixProvider";
+
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <MatrixProvider>{children}</MatrixProvider>;
 }

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import HomeScreen from '@/components/game/HomeScreen';
+import { Button } from '@/components/ui/button';
 import GameHeader from '@/components/game/GameHeader';
 import PanoramaViewer from '@/components/game/PanoramaViewer';
 import ResultsScreen from '@/components/game/ResultsScreen';
@@ -16,11 +17,12 @@ import { useQuickAuth } from "@/hooks/useQuickAuth";
 import { useIsInFarcaster } from "@/hooks/useIsInFarcaster";
 
 // Dynamic import for WorldMap to avoid SSR issues with Leaflet
+import MatrixLoader from '@/components/matrix/MatrixLoader';
 const WorldMap = dynamic(() => import('@/components/game/WorldMap'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-      <div className="text-gray-500">Loading map...</div>
+    <div className="w-full h-full bg-[var(--bg)] flex items-center justify-center">
+      <MatrixLoader label="Loading map..." />
     </div>
   ),
 });
@@ -288,7 +290,12 @@ export default function GeoExplorerGame() {
   const currentRoundResult = gameState.roundScores[gameState.roundScores.length - 1];
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-[var(--bg)] text-[var(--text)] relative">
+      {loading && (
+        <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center">
+          <MatrixLoader label="Initializing..." />
+        </div>
+      )}
       {currentScreen === 'home' && (
         <HomeScreen onStart={startGame} />
       )}
@@ -315,16 +322,17 @@ export default function GeoExplorerGame() {
                 allowMove={gameState.mode !== 'no-move'}
               />
               
-              <button
+              <Button
                 onClick={showMapNow}
-                className="absolute bottom-4 right-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg font-semibold transition-colors z-10"
+                size="lg"
+                className="absolute bottom-4 right-4 z-10"
               >
                 {showMap ? 'Hide Map' : 'Make a Guess'}
-              </button>
+              </Button>
             </div>
 
             {/* Map as full-screen overlay when visible to avoid layout issues */}
-            <div className={`${showMap ? 'fixed inset-0 z-[100]' : 'hidden'} bg-white`} data-testid="map-overlay">
+            <div className={`${showMap ? 'fixed inset-0 z-[100]' : 'hidden'} bg-black`} data-testid="map-overlay">
               <WorldMap onGuess={handleGuess} active={showMap} />
             </div>
           </div>
