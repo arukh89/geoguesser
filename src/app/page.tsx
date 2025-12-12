@@ -105,6 +105,7 @@ export default function GeoExplorerGame() {
 
   const [currentScreen, setCurrentScreen] = useState<GameScreen>('home');
   const [showMap, setShowMap] = useState<boolean>(false);
+  const [showViewer, setShowViewer] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
   async function fetchRandomShot() {
@@ -319,31 +320,48 @@ export default function GeoExplorerGame() {
               />
             </div>
             {/* Open map overlay when guessing */}
-            <div className={`${showMap ? 'fixed inset-0 z-[100] flex items-center justify-center' : 'hidden'}`}>
-              {/* Centered map card so Matrix rain remains visible around edges */}
-              <div
-                className="relative w-[min(1200px,95vw)] h-[min(770px,85vh)] rounded-2xl overflow-hidden mx-panel"
-                data-testid="map-overlay"
-              >
-                <div className="absolute top-3 right-3 z-[5]">
-                  <Button onClick={hideMapNow} size="md" variant="secondary" aria-label="Close Map">Close</Button>
-                </div>
+            <div className={`${showMap ? 'fixed inset-0 z-[100]' : 'hidden'}`}>
+              <div className="absolute top-4 right-4 z-[101]">
+                <Button onClick={hideMapNow} size="md" variant="secondary" aria-label="Close Map">Close</Button>
+              </div>
+              <div className="absolute inset-0">
                 <WorldMap onGuess={handleGuess} active={showMap} />
+              </div>
 
-                {/* Mission image popup like Mapillary */}
-                <div className="absolute left-1/2 top-8 -translate-x-1/2 z-[6]">
-                  <div className="w-[360px] h-[220px] rounded-xl overflow-hidden mx-panel">
-                    <PanoramaViewer
-                      imageUrl={gameState.currentLocation.panoramaUrl}
-                      shot={gameState.currentLocation.provider ? {
-                        provider: gameState.currentLocation.provider as 'mapillary'|'kartaview',
-                        imageId: gameState.currentLocation.imageId,
-                        imageUrl: gameState.currentLocation.imageUrl,
-                      } : undefined}
-                      allowMove={gameState.mode !== 'no-move'}
-                    />
-                  </div>
-                </div>
+              {/* Mission image preview; click to open full-screen viewer */}
+              <button
+                type="button"
+                onClick={() => setShowViewer(true)}
+                className="absolute left-1/2 top-8 -translate-x-1/2 z-[102] w-[360px] h-[220px] rounded-xl overflow-hidden mx-panel"
+                aria-label="Open mission image"
+              >
+                <PanoramaViewer
+                  imageUrl={gameState.currentLocation.panoramaUrl}
+                  shot={gameState.currentLocation.provider ? {
+                    provider: gameState.currentLocation.provider as 'mapillary'|'kartaview',
+                    imageId: gameState.currentLocation.imageId,
+                    imageUrl: gameState.currentLocation.imageUrl,
+                  } : undefined}
+                  allowMove={false}
+                />
+              </button>
+            </div>
+
+            {/* Full-screen image viewer overlay */}
+            <div className={`${showViewer ? 'fixed inset-0 z-[110] bg-black' : 'hidden'}`}>
+              <div className="absolute top-4 right-4 z-[111]">
+                <Button onClick={() => setShowViewer(false)} size="md" variant="secondary" aria-label="Close Image">Close</Button>
+              </div>
+              <div className="absolute inset-0">
+                <PanoramaViewer
+                  imageUrl={gameState.currentLocation.panoramaUrl}
+                  shot={gameState.currentLocation.provider ? {
+                    provider: gameState.currentLocation.provider as 'mapillary'|'kartaview',
+                    imageId: gameState.currentLocation.imageId,
+                    imageUrl: gameState.currentLocation.imageUrl,
+                  } : undefined}
+                  allowMove={gameState.mode !== 'no-move'}
+                />
               </div>
             </div>
 
