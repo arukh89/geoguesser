@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "test": "pnpm test:e2e",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
