@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { Info } from 'lucide-react';
 import { Attribution } from './Attribution';
-import MatrixRain from '@/components/matrix/MatrixRain';
 
 type Shot = { provider: 'mapillary'|'kartaview'; imageId?: string; imageUrl?: string };
 
@@ -89,8 +88,7 @@ export default function PanoramaViewer({ imageUrl, shot, onLoad, allowMove = tru
 
   return (
     <div className="relative w-full h-full bg-black">
-      {/* Digital rain overlay (disabled if user prefers reduced motion via provider) */}
-      <MatrixRain />
+      {/* background rain now rendered globally in layout */}
       {shot?.provider === 'mapillary' && shot.imageId ? (
         <DynamicMapillary imageId={shot.imageId} allowMove={allowMove} />
       ) : shot?.provider === 'kartaview' && (shot.imageUrl || imageUrl) ? (

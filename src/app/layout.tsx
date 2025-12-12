@@ -6,6 +6,8 @@ import { cookies } from "next/headers";
 import { ReadyNotifier } from "@/components/ready-notifier";
 import { Providers } from "./providers";
 import FarcasterWrapper from "@/components/FarcasterWrapper";
+import MatrixRain from "@/components/matrix/MatrixRain";
+import GlobalHeader from "@/components/GlobalHeader";
 
 
 const mono = Share_Tech_Mono({ subsets: ["latin"], weight: "400" });
@@ -26,14 +28,18 @@ export default async function RootLayout({
             <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossOrigin="" />
           </head>
           <body className={`antialiased ${mono.className}`}>
-            {/* Do not remove this component, we use it to notify the parent that the mini-app is ready */}
-            <ReadyNotifier />
-            <Providers>
-      <FarcasterWrapper>
-        {children}
-      </FarcasterWrapper>
-      </Providers>
-            <ResponseLogger />
+            <MatrixRain className="pointer-events-none fixed inset-0 z-0 opacity-[0.15]" />
+            <div className="relative z-10">
+              <GlobalHeader />
+              {/* Do not remove this component, we use it to notify the parent that the mini-app is ready */}
+              <ReadyNotifier />
+              <Providers>
+                <FarcasterWrapper>
+                  {children}
+                </FarcasterWrapper>
+              </Providers>
+              <ResponseLogger />
+            </div>
           </body>
         </html>
       );
